@@ -1,0 +1,72 @@
+/*!style 구역은 css구역임*/
+
+        /* 태그명을 바로 가리킬 때 */
+
+        body {
+            font-family: 'Black Han Sans', sans-serif/*폰트를 못 불러오는 경우 불러오는 폰트*/;
+        }
+        
+        /* * {
+            font-family: 'Black Han Sans', sans-serif //폰트를 못 불러오는 경우 불러오는 폰트;
+        } 
+        이걸로 폰트 적용하는 경우 mytitle은 적용 안되는 경우가 있는데 그건 *로 mytitle 내의 
+        h1에 폰트가 적용되고 mytitle은 h1의 상위 클래스이기 때문에 mytitle에서 폰트를 바꿔도
+        이미 하위 태그인 h1은 폰트가 정해져있으므로 적용이 안된다. 
+        */
+
+        body {
+            background-color:white;
+            color: black;
+        }
+
+        h1 {
+            color: blue;
+            margin: 50;
+        }
+
+        /* class를 만들어 가리킬 때 */
+
+        /*id, class, body 순서로 적용됨*/
+
+        .tag {
+            color: pink;
+        }
+
+        div>input {
+            color: yellow;
+        }
+
+        /*div중에서 tag인 것만 바꿔라*/
+
+        div.a {
+            color: purple;
+        }
+
+        .mytitle {
+            color: white;
+            width: 300px;
+            height: 200px;
+            background-image: url('https://www.ancient-origins.net/sites/default/files/field/image/Agesilaus-II-cover.jpg');
+            background-position: center;
+            background-size: cover;
+
+            border-radius: 10px;
+            text-align: center;
+            padding-top: 40px;
+
+            font-family: 'Nanum Pen Script', cursive;
+        }
+
+        .wrap {
+            margin: 10px auto;
+            width: 300px;
+        }
+
+        /* CSS */
+
+        /* '*' 은 모든것을 의미, 주로 폰트 적용할 때 사용*/
+
+        /* * {
+            margin: 50;
+            text-decoration: none;
+        } */

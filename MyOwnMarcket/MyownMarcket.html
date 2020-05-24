@@ -1,0 +1,123 @@
+<html>
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+
+    <!--Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Stylish&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:ital,wght@1,700&family=Pangolin&family=Roboto+Mono:wght@300&family=Roboto+Slab:wght@400;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="MyownMarcket.css" />
+
+    <script>
+
+        function order() {
+
+            let inputBox = [['이름', $('#name').val()], ['주소', $('#address').val()], ['전화번호', $('#phone_num').val()]];
+            let i;
+            for (i = 0; i < inputBox.length; i++) {
+                if (inputBox[i][1] == '') {
+                    alert(inputBox[i][0] + '을(를) 입력해 주세요');
+                    break;
+                }
+            }
+            if (i == inputBox.length)
+                alert('주문 완료');
+
+            // if($('#name').val() == '')
+            //     alert('이름을 입력해주세요');
+            // else if($('#address').val() == '')
+            //     alert('주소를 입력해주세요');
+            // else if($('#phone_num').val() == '')
+            //     alert('전화번호를 입력해주세요');
+            // else
+            //     alert('주문 완료'); 
+            
+            //poly fill, 웹 표준 맞추는것이 필요
+            //poly fill이란 크롬에서는 A라는 코드만 쳐도 제대로 동작하는것을 IE에서는 a+b+c로 자동으로 코드가 변경되어 동일한 동작을 할 수 있도록 해줌   
+            
+        }
+    </script>
+
+</head>
+
+<body class="body">
+
+    <div class = "img-div">
+        <img src="drum.jpg" class = "img"/>
+    </div>
+
+    <div class="paragraph1">
+        <p>
+            <h1 class="h1">Yamaha PHX</h1> 가격 : 1,500,000원 / 개</p>
+
+        <ul>
+            <li>Shell : All American Maple Shell</li>
+            <li>Ply : Snare - 8Ply , Base Drum - 7Ply , TomTom&Floor Tom - 6Ply</li>
+            <li>Hardware : Premium Quality Hardware - Memory Lock system + I.S (Increased sustain) Mounting system + Double chain</li>
+            strong Pedal + All Bronz nut Drum Head - Remo Head 기본 채택</li>
+            <li>Bass drum : Power stroke Coated [Front] / Clear for beater [Back]</li>
+            <li>Toms : Remo pinstripe 2ply</li>
+            <li>Snare : Embassador coated Snare</li>
+            <li>Strainer :
+                <span class="span">Nickelworks USA</span>
+            </li>
+            <li>Color : BSB(Black Sun Burst) , NT(Natural) , SW(Satin White)</li>
+        </ul>
+    </div>
+
+    <div>
+        <span style="font-size:2.5em;">주문하기</span>
+        <table>
+            <tbody>
+                <tr>
+                    <td class="td">주문자 이름 : </td>
+                    <td>
+                        <input type="name" class="input_box form-control" id="name" name="name">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td">수량 : </td>
+                    <td>
+                        <input value="1" type="number" class="input_box form-control" min="1" max="10" id="num" name="num">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td">주소 : </td>
+                    <td>
+                        <input type="text" class="input_box form-control" id="address" name="address">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td">전화번호 : </td>
+                    <td>
+                        <input type="tel" class="input_box form-control" id="phone_num" name="phone_num">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="div button">
+        <input onclick="order()" class="button_style" type="button" name="order" value="주문하기">
+        <!-- 버튼 타입으로 submit을 사용할 수도있는데 submit은 뭔가 전달할때 사용하는 용도이다. -->
+    </div>
+</body>
+
+</html>
