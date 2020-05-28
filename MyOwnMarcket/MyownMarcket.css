@@ -49,6 +49,7 @@
 
     .body {
         background-image : url('background.jpeg'); 
+        background-size : cover;
         width: 700px;
         margin-left: auto;
         margin-right: auto;
