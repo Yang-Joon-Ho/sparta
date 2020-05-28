@@ -61,23 +61,39 @@
 
         }
 
-        $.ajax({
+        //$document.ready는 한번만 실행됨
+        $(document).ready(function () {
+            updateData();
+        });
 
-            type: "GET", // GET 방식으로 요청한다.
-            url: "https://api.manana.kr/exchange/rate.json",
-            data: {}, // 요청하면서 함께 줄 데이터 (GET 요청시엔 비워두세요)
+        function updateData() {
 
-            success: function (r) { // 서버에서 준 결과를 response라는 변수에 담음
-                console.log(r); // 서버에서 준 결과를 이용해서 나머지 코드를 작성
+            $('#append').empty();
 
-                let rate = r[1]['rate']; //일단 url만 넣어주고
-                console.log(rate);
-                let temp = " (USD 환율 : " + rate + ")";
+            $.ajax({
 
-                $('#append').append(temp);
-               
-            }
-        })
+                type: "GET", // GET 방식으로 요청한다.
+                url: "https://api.manana.kr/exchange/rate.json",
+                data: {}, // 요청하면서 함께 줄 데이터 (GET 요청시엔 비워두세요)
+
+                success: function (r) { // 서버에서 준 결과를 response라는 변수에 담음
+                    console.log(r); // 서버에서 준 결과를 이용해서 나머지 코드를 작성
+
+                    let rate = r[1]['rate']; //일단 url만 넣어주고
+                    console.log(rate);
+                    let temp = " (USD 환율 : " + rate + ")";
+                    // let temp_html = `<span id = "ajax" class = "blue">${temp}</span>`
+
+                    $('#append').append(temp);
+
+                }
+            });
+
+            /*setTimeout은 원래 한번만 실행되고 마는 메소드이지만
+            매개함수로 가지고 있는 updateData()에 의해 재귀적으로 호출된다
+            */
+            timer = setTimeout("updateData()", 3000);
+        }
 
     </script>
 
@@ -90,8 +106,8 @@
     </div>
 
     <div class="paragraph1">
-        <h1 class="h1">Yamaha PHX</h1> <span id = "append"> 가격 : $1,500 / 세트</span>
-        
+        <h1 class="h1">Yamaha PHX</h1> 가격 : $1,500 / 세트 <span id="append" class = "blue"></span>
+
         <ul>
             <li>Shell : All American Maple Shell</li>
             <li>Ply : Snare - 8Ply , Base Drum - 7Ply , TomTom&Floor Tom - 6Ply</li>
