@@ -1,4 +1,5 @@
 
+const price = 1500; //물건 가격
 
 function order() {
 
@@ -10,8 +11,12 @@ function order() {
             break;
         }
     }
-    if (i == inputBox.length)
-        alert('주문 완료');
+    if (i == inputBox.length){
+        
+        let sum = $('#num').val() * price;
+
+        alert('주문 완료, 총 가격 : ' + sum);
+    }
 
     // if($('#name').val() == '')
     //     alert('이름을 입력해주세요');
@@ -29,6 +34,11 @@ function order() {
 
 //$document.ready는 한번만 실행됨
 $(document).ready(function () {
+
+    let temp = "가격 : $ " + price + " / 세트";
+
+    $('#price').append(temp);
+
     updateData();
 });
 
