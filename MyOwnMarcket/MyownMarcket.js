@@ -15,7 +15,7 @@ function order() {
         
         let sum = $('#num').val() * price;
 
-        alert('주문 완료, 총 가격 : ' + sum);
+        alert('주문 완료, 총 가격 : $ ' + sum);
     }
 
     // if($('#name').val() == '')
