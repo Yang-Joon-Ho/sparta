@@ -7,10 +7,24 @@ db = client.dbsparta
 # 'users'라는 collection에 {'name':'bobby','age':21}를 넣습니다.
 #db.movies.update_many({'star' : 9.39},{'$set' : {'star' : 0}})
 
-artist = db.musics.find_one({'artist' : '아이유 (IU)'}, {'_id': False})
+print('가수 이름 입력 : ')
+input = input()
 
-singers = db.musics.find({'artist' : artist['artist']})
+musics = db.musics.find({})
 
-print('아이유 노래 : \n')
-for singer in singers: 
-    print(singer['title'])
+print('\n' + input + '의 노래 : ')
+for music in musics :
+    string = music['artist']
+    string = string.split('(')
+    
+    first = string[0].strip(' ')
+    last = ''
+    if len(string) > 1:
+        last = string[1].strip(')')
+
+    if input == first :
+        print(music['title'])
+    elif input == last:
+        print(music['title'])
+    
+
