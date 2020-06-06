@@ -20,4 +20,4 @@ for movie in movies:
         print (a_tag.text)
 
 
-        
+# requests라는 패키지는 서버끼리 통신을 가능하게 해주는 패키지
