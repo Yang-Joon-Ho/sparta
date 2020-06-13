@@ -7,7 +7,8 @@ from bs4 import BeautifulSoup
 from bson import ObjectId
 
 from pymongo import MongoClient           # pymongo를 임포트 하기(패키지 인스톨 먼저 해야겠죠?)
-client = MongoClient('mongodb://ho1920:foavkq250@localhost', 27017)  # mongoDB는 27017 포트로 돌아갑니다.
+client = MongoClient('localhost', 27017)  # mongoDB는 27017 포트로 돌아갑니다.
+#client = MongoClient('mongodb://ho1920:foavkq250@localhost',27017)
 db = client.dbsparta                      # 'dbsparta'라는 이름의 db를 만듭니다.
 
 ## HTML을 주는 부분
@@ -19,7 +20,7 @@ def home():
 def listing():
     # 1. 모든 document 찾기 & _id 값은 출력에서 제외하기
     # 2. articles라는 키 값으로 영화정보 내려주기
-    articles = objectIdDecoder(list(db.articles.find({})))
+    articles = objectIdDecoder(list(db.articles.find({}).sort('_id',-1)))
 
     return jsonify({'result':'success', 'articles':articles})
 
@@ -53,10 +54,17 @@ def saving():
     comment_receive = request.form['comment_give']
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-    data = requests.get(url_receive, headers = headers)
-    #reqeusts.get을 통해 해당 url에 headers를 가지고 접속
-    #html을 가져온다
     
+    try:
+        data = requests.get(url_receive, headers = headers)
+        #reqeusts.get을 통해 해당 url에 headers를 가지고 접속
+        #html을 가져온다
+    except requests.exceptions.MissingSchema:
+        return jsonify({'result':'success', 'msg' : 'url 제대로 적으셈ㅋ'})
+    except requests.exceptions.InvalidURL:
+        return jsonify({'result':'success', 'msg' : 'url 제대로 적으셈ㅋ'})
+    except requests.exceptions.InvalidSchema:
+        return jsonify({'result':'success', 'msg' : 'url 앞에 붙어있는거 지우셈'})
     #한글 인코딩이 깨지는 문제를 해결하기 위함
     data.encoding = None
     soup = BeautifulSoup(data.text, 'html.parser')
@@ -81,6 +89,7 @@ def saving():
     }
 
     db.articles.insert_one(article)
+
     # 1. 클라이언트로부터 데이터를 받기
 	# 2. meta tag를 스크래핑하기
 	# 3. mongoDB에 데이터 넣기
