@@ -14,6 +14,7 @@ def get_urls():
     soup = BeautifulSoup(data.text, 'html.parser')
 
     trs = soup.select('#old_content > table > tbody > tr')
+    print(trs)
 
     urls = []
     for tr in trs:
@@ -22,6 +23,7 @@ def get_urls():
             baseurl = 'https://movie.naver.com/'
             url = baseurl + a['href']
             urls.append(url)
+            print(url)
 
     return urls
 

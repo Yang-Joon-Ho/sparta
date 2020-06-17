@@ -2,6 +2,8 @@ $(document).ready(function () {
 
     save_article();
     get_article();
+    post_index();
+    get_index();
 
 });
 
@@ -31,7 +33,7 @@ function get_article() {
             if (response['result'] == 'success') {
                 let articles = response['articles']
                 make_card(articles['url'], articles['image'], articles['title'], articles['desc']);
-                
+
             }
         }
     })
@@ -50,4 +52,47 @@ function make_card(url, image, title, desc) {
 
     $('#main-box').append(temp_html);
 }
+
+function post_index() {
+
+    $.ajax({
+        type: "POST",
+        url: "/index",
+        data: { url_give: 'https://kr.investing.com/indices/us-30' },
+        success: function (response) {
+            if (response['result'] == 'success') {
+            }
+        }
+    })
+}
+
+function get_index() {
+
+    $.ajax({
+        type: "GET",
+        url: "/index",
+        data: {},
+        success: function (response) {
+            if (response['result'] == 'success') {
+                let index = response['dow_index']
+                make_index(index['dow_index'], index['date'] );
+            }
+        }
+    })
+}
+
+function make_index(index, date) {
+
+    let temp_html = `<div class="col p-4 d-flex flex-column position-static">
+        <strong class="d-inline-block mb-2 text-primary">다우 지수</strong>
+        <h3 class="mb-0">${index}</h3>
+        <div class="mb-1 text-muted">${date}</div>
+        <p class="card-text mb-auto">This is a wider card with supporting text below as a natural
+                    lead-in to additional content.</p>
+        <a href="#" class="stretched-link">Continue reading</a>
+    </div>`;
+
+    $('#index-card').append(temp_html);
+}
+
 

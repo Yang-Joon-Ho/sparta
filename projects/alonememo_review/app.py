@@ -39,7 +39,7 @@ def delete():
 
     id_receive = ObjectId(request.form['id_give'])
     db.articles.delete_one({'_id' : id_receive})
-
+    
     print(id_receive)
     # id_receive = request.form['id_give'] 
     # print(id_receive)
