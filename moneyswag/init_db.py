@@ -22,23 +22,88 @@ db = client.dbsparta
 # DB에 저장할 영화인들의 출처 url을 가져옵니다.
 def get_urls():
     
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-    
-    driver.get("https://kr.investing.com/stock-screener/?sp=country::5|sector::a|industry::a|equityType::a%3Ceq_market_cap;1")
-    wait = WebDriverWait(driver, 10)
-    #wait.until(expected_conditions.invisibility_of_element((By.CLASS_NAME, 'asgjkarklghkwrjg')))
-    wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'symbol left bold elp')))
-    #driver.find_element_by_xpath("//i[@class='popupCloseIcon largeBannerCloser']").click()
-    data = driver.find_element_by_xpath('//*[@id="resultsTable"]/tbody/tr')
-    #경로 : #resultsTable tbody tr
+    #headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
 
-    print(data)
-    # data = driver.page_source
-    # soup = BeautifulSoup(data, 'html.parser')
+    base_url = 'https://kr.investing.com/stock-screener/?sp=country::5|sector::a|industry::a|equityType::a%3Ceq_market_cap;'
     
-    # #print(soup)
+    # i = 1
+
+    # driver.get(base_url + str(i))
+            
+    # WebDriverWait(driver, 15).until(
+    #     EC.presence_of_element_located((By.XPATH, r'//*[@id="resultsTable"]/tbody/tr')))
+
+    # html = driver.page_source
+    # soup = BeautifulSoup(html, 'html.parser')
+
     # trs = soup.select('#resultsTable > tbody > tr')
-    # print(trs)
+    # for tr in trs:
+    #     #print(tr)
+    #     print(tr.select_one('[data-column-name="exchange_trans"]').text)
+    #     break    
+
+    i = 0
+    while 1:
+        try:
+            i += 1        
+            driver.get(base_url + str(i))
+            
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_element_located((By.XPATH, r'//*[@id="resultsTable"]/tbody/tr')))
+
+            html = driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+
+            trs = soup.select('#resultsTable > tbody > tr')
+            for tr in trs:
+                name_trans = tr.select_one('[data-column-name="name_trans"]').text
+                symbol = tr.select_one('[data-column-name="viewData.symbol"]').text
+                exchange_trans = tr.select_one('[data-column-name="exchange_trans"]').text
+                sector_trans = tr.select_one('[data-column-name="sector_trans"]').text
+                industry_trans = tr.select_one('[data-column-name="industry_trans"]').text
+                last_price = tr.select_one('[data-column-name="last"]').text
+                pair_change_percent = tr.select_one('[data-column-name="pair_change_percent"]').text
+                turnover_volume = tr.select_one('[data-column-name="turnover_volume"]').text
+
+                doc = {
+                    'name': name_trans,
+                    'symbol': symbol,
+                    'exchange': exchange_trans,
+                    'sector': sector_trans,
+                    'last_price': last_price,
+                    'pair_change_percent': pair_change_percent,
+                    'turnover_volume': turnover_volume,
+                    'industry': industry_trans,
+                }
+                
+                print('페이지 : ' + str(i) + ', ' + str(doc))
+                db.stocks.insert_one(doc)
+
+        except ElementNotVisibleException:
+            print('데이터가 더이상 존재하지 않습니다.')
+            break
+
+
+    #종목, 거래소, 기호, 종가, 변동, 시가 총액, 거래량
+
+    # for i in range(1,2) :
+    #     data = requests.get(url + str(i), headers = headers)
+    #     print(data)
+    #     soup = BeautifulSoup(data.text, 'html.parser')
+        
+    #     trs = soup.select('#resultsTable > tbody > tr')
+    #     print(trs)
+    #     urls = []
+    #     for tr in trs:
+    #         a = tr.select_one('td.symbol.left.bold.elp > a')
+    #         if a is not None:
+    #             baseurl = 'http://kr.investing.com'
+    #             url = baseurl + a['href']
+    #             urls.append(url)
+    #             print(url)
+
+
+    
     # urls = []
     # for tr in trs:
     #     a = tr.select_one('td.symbol.left.bold.elp > a')
@@ -57,23 +122,6 @@ def get_urls():
     #data = requests.get('https://kr.investing.com/stock-screener/?sp=country::5|sector::a|industry::a|equityType::a|exchange::a%3Ceq_market_cap;1', headers = headers)
     #print(data.text)
     #i = 0
-
-
-    # for i in range(1,2) :
-    #     data = requests.get(url + str(i), headers = headers)
-    #     print(data)
-    #     soup = BeautifulSoup(data.text, 'html.parser')
-        
-    #     trs = soup.select('#resultsTable > tbody > tr')
-    #     print(trs)
-    #     urls = []
-    #     for tr in trs:
-    #         a = tr.select_one('td.symbol.left.bold.elp > a')
-    #         if a is not None:
-    #             baseurl = 'http://kr.investing.com'
-    #             url = baseurl + a['href']
-    #             urls.append(url)
-    #             print(url)
         
         
 

@@ -13,6 +13,7 @@ db = client.dbsparta                      # 'dbsparta'라는 이름의 db를 만
 def home():
    return render_template('index.html')
 
+#기사 html에 보여주기
 @app.route('/article', methods=['GET'])
 def listing():
 
@@ -24,6 +25,7 @@ def listing():
    
 
 ## API 역할을 하는 부분
+#최신 기사 가져오기 
 @app.route('/article', methods=['POST'])
 def saving():
 
@@ -38,14 +40,14 @@ def saving():
 
     temp_url = soup.select_one('#leftColumn > div.largeTitle > article.js-article-item.articleItem > div.textDiv')
     
-    
     title = temp_url.select_one('a.title').text
-
-    if db.articles.find({'title' : title}) is None :
+    
+    #db에 동일한 기사가 없다면 
+    if title != db.articles.find_one({})['title']:
+        db.articles.delete_many({})
         description = temp_url.select_one('p').text
         url_url = 'https://kr.investing.com' + temp_url.select_one('a')['href'] #한번 더 들어갈 기사 주소
-
-
+       
         data = requests.get(url_url, headers=headers)
         soup = BeautifulSoup(data.text, 'html.parser')
 
@@ -55,6 +57,7 @@ def saving():
                     'title': title, 'desc': description}
 
         db.articles.insert_one(article)
+
 
     return jsonify({'result': 'success', 'msg':'POST 연결되었습니다!'})
 
