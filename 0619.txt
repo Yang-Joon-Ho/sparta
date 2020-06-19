@@ -1,0 +1,30 @@
+오늘 종목 검색 했을 때, db에서 꺼내와서 
+홈페이지에서 보여주도록 한다. 
+
+https://kr.investing.com/news/stock-market-news/article-424817
+
+모든 종목들을 내 db에 저장하게 되면 문제가 전날 종가, 퍼센트 등을 최소 하루에 한번씩 업데이트 해줘야한다는 것이다.
+이러면 너무 비효율적이고, 내가 필요한 종목에 대해서만 자세히 볼 수 있고, 모의 트레이딩 할 수 있게만 해주면 될 것 같다.
+예를들어 검색창에 애플 이라고 치면 '애플'이라는 값을 받아서 
+셀레니움으로 검색을 하고, 정보를 받아오면 된다. 
+그리고 검색한 종목에 한해서 현재 가격이 매번 초기화 되게끔 한다.  
+
+아니면 db에 저장해놨다가 
+
+
+그냥 셀레니움 사용해서 애플이면 애플 검색하고 검색 결과는 한 10개까지만 보여주도록 하자 이걸 
+검색 창 밑에 나열해야함 
+
+애플 검색하면 12개의 결과가 나오는데 테이블 형식이고, 각각은 tr이다. bs로 html을 text형식으로 바꾼 뒤, 
+for tr in trs이런식으로 반복문을 돌면서 각 tr에서 필요한 데이터를 뽑아 dic으로 만들건데 이 때 변수 i를 두어
+1에서 10까지만 돌도록 해야한다. 아니 일단 다 나오게해도 상관 없을듯 
+
+일단 app.py에서 입력창으로 받은 데이터를 셀레니움을 통해 인베스팅에서 검색하고 그 결과를 보여주도록 하자 
+
+<a class="js-inner-all-results-quote-item row" href="/equities/apple-computer-inc">
+<span class="flag first"><i class="ceFlags middle USA"></i></span>    
+<span class="second">AAPL</span>
+<span class="third">애플</span>
+<span class="fourth">주식 - 나스닥  equities</span>
+</a>, <a class="js-inner-all-results-quote-item row" href="/equities/apple-computer-inc?cid=963008">
+<span class="flag first"><i class="ceFlags middle Germany"></i></span>
