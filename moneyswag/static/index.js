@@ -41,12 +41,13 @@ function get_article() {
 
 function make_card(url, image, title, desc) {
 
+    let urll = 'https://kr.investing.com/equities/apple-computer-inc'
     let temp_html = `<div class="px-0">
                         <img class = "rounded article-img" src="${image}">
                         <div>
                             <h1 class="display-4 font-italic">${title}</h1>
                             <p class="lead my-3">${desc}</p>
-                            <p class="lead mb-0"><a href="${url}" class="text-white font-weight-bold">Contiue reading ...</a></p>
+                            <p class="lead mb-0"><a href="${urll}" class="text-white font-weight-bold">Contiue reading ...</a></p>
                         </div>               
                 </div>`;
 
@@ -75,7 +76,7 @@ function get_index() {
         success: function (response) {
             if (response['result'] == 'success') {
                 let index = response['dow_index']
-                make_index(index['dow_index'], index['date'] );
+                make_index(index['dow_index'], index['date']);
             }
         }
     })
@@ -95,4 +96,25 @@ function make_index(index, date) {
     $('#index-card').append(temp_html);
 }
 
+function search() {
+    
+    let url = 'https://kr.investing.com/search/?q=';
+    let stock_name = $('#stock').val();
 
+    $.ajax({
+        type: "POST",
+        url: "/stock",
+        data: { url_give : url, stock_give: stock_name },
+        success: function (response) { // 성공하면
+            if (response['result'] == 'success') {
+                alert(response['msg']);
+                window.location.reload();
+            } else if (response['result'] == 'fail') {
+                alert(response['msg']);
+                window.location.reload();
+            } else {
+                alert('서버오류남ㅋㅋㅋ');
+            }
+        }
+    })
+}

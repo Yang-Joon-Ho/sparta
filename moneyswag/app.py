@@ -8,6 +8,21 @@ from pymongo import MongoClient           # pymongo를 임포트 하기(패키�
 client = MongoClient('localhost', 27017)  # mongoDB는 27017 포트로 돌아갑니다.
 db = client.dbsparta                      # 'dbsparta'라는 이름의 db를 만듭니다.
 
+##################################### 셀레니움
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
+from selenium.common.exceptions import ElementNotVisibleException
+
+#웹 드라이버 설정
+path = "D:/chromedriver_win32/chromedriver"
+driver = webdriver.Chrome(path)
+##############################################
+
+
 ## HTML을 주는 부분
 @app.route('/')
 def home():
@@ -43,7 +58,8 @@ def saving():
     title = temp_url.select_one('a.title').text
     
     #db에 동일한 기사가 없다면 
-    if title != db.articles.find_one({})['title']:
+    # if title != db.articles.find_one({})['title']:
+    if db.articles.find_one({'title' : title}) is None:
         db.articles.delete_many({})
         description = temp_url.select_one('p').text
         url_url = 'https://kr.investing.com' + temp_url.select_one('a')['href'] #한번 더 들어갈 기사 주소
@@ -93,6 +109,39 @@ def index_giving():
 
     dow_index = db.dow_index.find_one({}, {'_id' : 0})
     return jsonify({'result':'success', 'dow_index':dow_index})
+
+
+@app.route('/stock', methods=['POST'])
+def stock_searching():
+
+    #종목 명을 받음
+    stock_receive = request.form['stock_give']
+    url_receive = request.form['url_give']
+    
+    search_url = url_receive + stock_receive     
+
+    driver.get(search_url)
+
+    html = driver.page_source
+    soup = BeautifulSoup(html, 'html.parser')
+
+    stocks = soup.select('#fullColumn > div > div > div > div > a')
+    
+    for stock in stocks:
+        dic = {'href' : stock['href'],
+                'symbol' : stock.select_one('span[class="second"]').text}
+        print(dic)
+    
+
+    #stock = db.stocks.find_one({'name' : stock_receive}, {'_id' : 0})
+    
+    return jsonify({'result' : 'success', 'msg' : '성공'})
+
+    # if stock is None:
+    #     return jsonify({'result' : 'fail', 'msg' : '니가 검색한 종목 없음ㅋㅋ'})
+    # else:
+    #     return jsonify({'result' : 'success', 'stock' : stock})
+
 
 
 if __name__ == '__main__':

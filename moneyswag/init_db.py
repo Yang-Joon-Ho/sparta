@@ -125,7 +125,11 @@ def get_urls():
         
         
 
-get_urls()
+#get_urls()
+
+######################3333db 초기화
+
+
 
 #     trs = soup.select('#old_content > table > tbody > tr')
 
