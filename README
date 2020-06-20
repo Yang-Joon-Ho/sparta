@@ -2,3 +2,5 @@
 실시간 호가창 : https://markets.cboe.com/us/equities/market_statistics/book_viewer/
 
 주가 api : https://iexcloud.io/docs/api/#attribution
+
+api에서 데이터 가져오는것과 html에서 데이터 가져오는 속도는 차이가 없나? 
