@@ -4,3 +4,5 @@
 주가 api : https://iexcloud.io/docs/api/#attribution
 
 api에서 데이터 가져오는것과 html에서 데이터 가져오는 속도는 차이가 없나? 
+
+api나 html에 0.1초에 한번씩 접근하는것 가능? 
