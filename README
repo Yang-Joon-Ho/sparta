@@ -6,3 +6,9 @@
 api에서 데이터 가져오는것과 html에서 데이터 가져오는 속도는 차이가 없나? 
 
 api나 html에 0.1초에 한번씩 접근하는것 가능? 
+
+iex 과거 주가데이터 가져오는 방법 메뉴얼 :
+https://iexcloud.io/docs/api/#historical-prices
+
+iex help center :
+https://intercom.help/iexcloud/en/articles/4063720-historical-stock-prices-on-iex-cloud
