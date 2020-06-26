@@ -8,7 +8,8 @@ $(document).ready(function () {
   stock_price(symbol);
   current_price(symbol);
   order_record(symbol);
-  test();
+  get_total();
+  graph();
 });
 
 
@@ -61,6 +62,7 @@ function list_price(date, open, close, low, high, volume) {
 
 }
 
+//현재가 구하기
 function current_price(symbol) {
 
   url = `https://finance.yahoo.com/quote/${symbol}/history?period1=1488412800&period2=1593043200&interval=1d&filter=history&frequency=1d`
@@ -71,17 +73,22 @@ function current_price(symbol) {
     data: { url_give: url },
     success: function (response) { // 성공하면
 
+      //현재가 구하면서 현재 손익까지 계산함 
       $('#price').empty();
       $('#rate').empty();
+      $('#profit').empty();
 
       let temp = response['price_rate'];
 
+      let cal = $('#get_total_total').text() - $('#get_total_quantity').text() * temp['price'];
+
       $('#price').append(temp['price']);
       $('#rate').append(temp['rate']);
+      $('#profit').append(cal);
     }
   })
 
-  //timer = setTimeout(current_price, 1000, symbol);
+  timer = setTimeout(current_price, 1000, symbol);
 }
 
 function calculate() {
@@ -143,17 +150,41 @@ function order_record(symbol) {
       // 개별 매수 기록
       temp.forEach(curr => list_orders(curr['_id'], curr['date'], curr['price'], curr['quantity'], curr['total']));
 
+      get_total();
     }
   })
 }
 
-function total_orders(temp) {
+//db의 stock total에서 매수 종합 데이터 가져오는 함수
+function get_total() {
 
-  // let total_price = 0;
+  let symbol = $('#stock_symbol').text()
+  $.ajax({
+    type: "POST",
+    url: "/get_total",
+    data: { symbol_give: symbol },
+    success: function (response) { // 성공하면
 
-  // for (i = 0; i < temp.length; i++){
-  //   total_price += 
-  // }
+      $('#stock_total').empty();
+
+      //왜 이것만 리스트로 왔는지 모르겠다.
+
+      temp = response[1]['get_total'];
+
+      //아직 매수종합 데이터가 없을 경우
+      if(temp == null)
+        return;
+
+      let temp_html = `<tr>
+      <td>${temp['price']}</td>
+      <td id = "get_total_quantity">${temp['quantity']}</td>
+      <td id = "get_total_total">${temp['total']}</td>
+      <td id = "profit"></td>
+    </tr>`;
+
+      $('#stock_total').append(temp_html);
+    }
+  })
 }
 
 function list_orders(id, date, price, quantity, total) {
@@ -212,7 +243,7 @@ function sell_stock(id) {
 }
 
 
-function test() {
+function graph() {
   'use strict'
 
   feather.replace()

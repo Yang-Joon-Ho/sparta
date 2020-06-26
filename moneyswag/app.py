@@ -280,10 +280,10 @@ def current_price():
 def save_order():
     
     symbol_receive = request.form['symbol_give']
-    price_receive = int(request.form['price_give'])
+    price_receive = float(request.form['price_give'])
     date_receive = request.form['date_give']
     quantity_receive = int(request.form['quantity_give'])
-    total_receive = int(request.form['total_give'])
+    total_receive = float(request.form['total_give'])
 
     stock = {'symbol': symbol_receive, 'price': price_receive,
                 'date': date_receive, 'quantity': quantity_receive,
@@ -308,9 +308,15 @@ def save_order():
 
     return jsonify({'result' : 'success'})
 
+
+#'매수 종합' 반환하는 함수 
 @app.route('/get_total', methods=['POST'])
 def get_total():
-    
+    symbol_receive = request.form['symbol_give']
+    result = db.stock_total.find_one({'symbol' : symbol_receive}, {'_id' : 0})
+
+    return jsonify({'result' : 'success'}, {'get_total' : result})
+
 
 @app.route('/get_order', methods=['POST'])
 def get_order():
@@ -319,6 +325,7 @@ def get_order():
     orders = objectIdDecoder(list(db.stock_orders.find({'symbol' : symbol_receive})))
 
     return jsonify({'result' : 'success', 'orders' : orders})
+
 
 @app.route('/sell_stock', methods=['DELETE'])
 def sell_stock():
