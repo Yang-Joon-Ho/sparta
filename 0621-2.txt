@@ -1,0 +1,83 @@
+https://cloud.iexapis.com/
+
+https://cloud.iexapis.com/stable/tops?token=YOUR_TOKEN_HERE&symbols=aapl
+
+https://cloud.iexapis.com/stable/stock/aapl/quote?token=YOUR_TOKEN_HERE
+
+/stock/market/batch?symbols=aapl,fb,tsla&types=quote,news,chart&range=1m&last=5
+
+https://cloud.iexapis.com/stable/stock/market/batch?symbols=aapl,fb,tsla&types=quote,news,chart&range=1m&last=5
+
+/stock/aapl/batch?types=quote,news,chart&range=1m&last=10
+
+
+
+https://cloud.iexapis.com/stable/stock/aapl/batch?types=quote,news,chart&range=1m&last=10?token=YOUR_TOKEN_HERE
+
+
+
+되는 api : https://cloud.iexapis.com/stable/stock/aapl/quote?token=pk_31c6148666914eaf9e526964898f75ab
+
+ex) 1. https://cloud.iexapis.com/stable/stock/aapl/quote?token=pk_31c6148666914eaf9e526964898f75ab&period=annual
+: 이건 그냥 직전 데이터만 불러옴 
+
+2. https://cloud.iexapis.com/stable/stock/aapl/quote?period=annual&token=pk_31c6148666914eaf9e526964898f75ab
+
+3. https://cloud.iexapis.com/beta/stock/NEE/chart/1y?token=pk_31c6148666914eaf9e526964898f75ab&format=csv
+
+################################################################
+특정 종목 특정 기간동안의 주가 가져오는 방법
+https://cloud.iexapis.com/beta/stock/snap/chart/1m?token=pk_31c6148666914eaf9e526964898f75ab
+
+https://cloud.iexapis.com/stable/stock/snap/intraday-prices?token=pk_31c6148666914eaf9e526964898f75ab&chartLast=20
+
+특정 종목의 모든 기간동안의 주가 가져오는 방법 
+https://cloud.iexapis.com/stable/stock/snap/chart/max?token=pk_31c6148666914eaf9e526964898f75ab
+################################################################
+
+iex cloud로 할 수 있는 것 :
+1. 과거 주가 데이터 불러오기 
+2. 15분전 주가 혹은 현재 주가 불러오기 (확실하지 않음)
+3. 회사의 간략한 정보 불러오기 
+
+오늘 할 수 있는 것 :
+종목을 검색했을 때 나열되는 종목 중 하나를 클릭하면 우측에 해당 종목의 이름, symbol, 간략한 정보, 직전 주가가 
+나오게끔 한다. 
+
+
+각각의 포트번호에 접근하는 방식은 url의 패턴을 통해서도
+달리 접근할 수 있고, 방법은 여러가지이다. 
+
+<aside class="col-md-4 blog-sidebar">"
+
+'use strict';
+const Request = require('request-promise-native');
+function connect() {
+    Request({
+        method: 'POST',
+        url: 'https://cloud.iexapis.com/stable/rules/create',
+        json: {
+            token: '{YOUR_API_TOKEN}',
+            ruleSet: 'AAPL',
+            type: 'any',
+            ruleName: 'My Rule',
+            conditions: [
+                ['changePercent','>',5],
+                ['latestPrice','<',100]
+            ],
+            outputs: [
+                {
+                    frequency: 60,
+                    method: 'email',
+                    to: 'your_email@domain'
+                }
+            ]
+        },
+    }).then((body) => {
+        console.log(body);
+    }).catch((err) => {
+        console.log("Error in request", err);
+    });
+}
+
+connect();

@@ -1,0 +1,18 @@
+오늘은 모의투자 기능을 구현해볼것이다. 
+
+날짜 선택 가능해야 하고, 주식 수량 정할수 있어야 하고 
+해당 날짜 이후로 계속 손익 계산이 되야한다. 그냥 현재가격이랑 빼서 구해보면 된다.
+
+매도 버튼을 누르면 매도 란에 기록되어야 함 
+
+그러면 매도 버튼을 누름과 동시에 매도 db에 저장이 되고, 실현손익도 동시에 
+그리고 매수 db에서 삭제되어야 함.  
+
+매도 시에 필요한 데이터 : 매도 시 날짜, 가격, 수량 
+
+<td><label for="quantity">수량</label>
+    <input value="1" min="1" type="number" class="form-control" id="input_quantity" placeholder="1" required>
+    <div class="invalid-feedback">
+      수량을 입력하세요
+    </div></td>
+    <td><input onclick="sell_stock()" class="button_style" type="button" name="buy" value="매도"></td>

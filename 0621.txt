@@ -1,0 +1,50 @@
+https://cloud.iexapis.com/
+
+https://cloud.iexapis.com/stable/tops?token=YOUR_TOKEN_HERE&symbols=aapl
+
+https://cloud.iexapis.com/stable/stock/aapl/quote?token=YOUR_TOKEN_HERE
+
+/stock/market/batch?symbols=aapl,fb,tsla&types=quote,news,chart&range=1m&last=5
+
+https://cloud.iexapis.com/stable/stock/market/batch?symbols=aapl,fb,tsla&types=quote,news,chart&range=1m&last=5
+
+/stock/aapl/batch?types=quote,news,chart&range=1m&last=10
+
+
+
+https://cloud.iexapis.com/stable/stock/aapl/batch?types=quote,news,chart&range=1m&last=10?token=YOUR_TOKEN_HERE
+
+
+되는 api : https://cloud.iexapis.com/stable/stock/aapl/quote?token=pk_31c6148666914eaf9e526964898f75ab
+
+'use strict';
+const Request = require('request-promise-native');
+function connect() {
+    Request({
+        method: 'POST',
+        url: 'https://cloud.iexapis.com/stable/rules/create',
+        json: {
+            token: '{YOUR_API_TOKEN}',
+            ruleSet: 'AAPL',
+            type: 'any',
+            ruleName: 'My Rule',
+            conditions: [
+                ['changePercent','>',5],
+                ['latestPrice','<',100]
+            ],
+            outputs: [
+                {
+                    frequency: 60,
+                    method: 'email',
+                    to: 'your_email@domain'
+                }
+            ]
+        },
+    }).then((body) => {
+        console.log(body);
+    }).catch((err) => {
+        console.log("Error in request", err);
+    });
+}
+
+connect();

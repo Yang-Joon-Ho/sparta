@@ -1,0 +1,15 @@
+iex api 접속 제한있음 
+
+뉴스, 차트 가져오기 :
+https://sandbox.iexapis.com/stable/stock/aapl/batch?types=quote,news,chart&range=1m&last=10&token=Tsk_8dad8f9743d74875bbe5d10f7f641f2f
+
+https://sandbox.iexapis.com/stable/stock/market/batch?symbols=aapl,fb&types=quote,news,chart&range=1m&last=5&token=Tsk_8dad8f9743d74875bbe5d10f7f641f2f
+
+iex api 접속 제한때문에 
+야후 파이낸스 https://finance.yahoo.com/quote/snap/history?period1=345427200&period2=1593043200&interval=1d&filter=history&frequency=1d
+에 가서 스크래핑으로 과거 주가를 긁어와야한다. 
+
+야후 파이낸스에서 과거 주가 긁어오기 성공
+
+이제 해야 하는게 '모의 투자'이다.
+

@@ -47,7 +47,7 @@ function make_card(url, image, title, desc) {
                         <div>
                             <h1 class="display-4 font-italic">${title}</h1>
                             <p class="lead my-3">${desc}</p>
-                            <p class="lead mb-0"><a href="${urll}" class="text-white font-weight-bold">Contiue reading ...</a></p>
+                            <p class="lead mb-0"><a href="${url}" class="text-white font-weight-bold">Contiue reading ...</a></p>
                         </div>               
                 </div>`;
 
@@ -97,20 +97,20 @@ function make_index(index, date) {
 }
 
 function search() {
-    
+
     let url = 'https://kr.investing.com/search/?q=';
     let stock_name = $('#stock').val();
 
     $.ajax({
         type: "POST",
-        url: "/stock",
-        data: { url_give : url, stock_give: stock_name },
+        url: "/search",
+        data: { url_give: url, stock_give: stock_name },
         success: function (response) { // 성공하면
             if (response['result'] == 'success') {
-                alert(response['msg']);
-                window.location.reload();
+                $('#stock_table').empty();
+                let datas = response['dictionary'];
+                datas.forEach(curr => make_board(curr['href'], curr['symbol'], curr['name'], curr['exchange']));
             } else if (response['result'] == 'fail') {
-                alert(response['msg']);
                 window.location.reload();
             } else {
                 alert('서버오류남ㅋㅋㅋ');
@@ -118,3 +118,122 @@ function search() {
         }
     })
 }
+
+function make_board(href, symbol, name, exchange) {
+    let base_url = 'https://kr.investing.com';
+    let url = base_url + href;
+
+    let temp_html = `<tr style="cursor:pointer;" onClick="show_stock('${symbol}')">
+    <td>${name}</td>
+    <td>${symbol}</td>
+    <td>${exchange}</td>
+  </tr>`;
+
+    $('#stock_table').append(temp_html);
+
+}
+
+function get_stock_value(symbol, token) {
+
+    let stock_value;
+
+    url = `https://cloud.iexapis.com/stable/stock/${symbol}/quote?token=${token}`;
+    //url = "https://cloud.iexapis.com/stable/stock/aapl/quote?token=pk_31c6148666914eaf9e526964898f75ab";
+    
+    $.ajax({
+        type: "GET",
+        url: url,
+        async: false,
+        data: {},
+        success: function (response) { // 성공하면
+            show_stock_value(response['symbol'], response['companyName'], response['primaryExchange'], response['close']);
+            stock_value = {'symbol' : response['symbol'], 'companyName' : response['companyName'],
+            'primaryExchange' : response['primaryExchange'], 'close' : response['close']};
+        }
+    })
+    return stock_value;
+}
+
+function get_stock_info(symbol, token) {
+
+    let stock_info;
+    
+    url = `https://cloud.iexapis.com/stable/stock/${symbol}/company?token=${token}`
+    console.log(url);
+    $.ajax({
+        type: "GET",
+        url: url,
+        async: false,
+        data: {},
+        success: function (response) { // 성공하면
+            show_stock_info(response['industry'], response['website'], response['description'], response['sector']);
+            stock_info = {'industry' : response['industry'], 
+            'website': response['website'], 'description' :  response['description'], 'sector' : response['sector']};
+        }
+    })
+
+    return stock_info;
+}
+//symbol, companyName, primaryExchange, close
+function show_stock_info(industry, website, description, sector){
+    
+    //<div class="col p-4 d-flex flex-column position-static">
+    
+    let temp_html = `<div class="col p-4 d-flex flex-column position-static">
+    <h5 id = "industry" class="mb-0">${industry}</h5>
+    <div id = "website" class="mb-1 text-muted">${website}</div>
+    <div id = "sector" class="mb-1 text-muted">${sector}</div>
+    <p id = "description" class="mb-auto">${description}</p>
+</div>`;
+
+    $('#main-right').append(temp_html);
+}
+
+function show_stock_value(symbol, companyName, primaryExchange, close){
+   
+    let temp_html = `<div class="col p-4 d-flex flex-column position-static">
+    <h5 id = "symbol" class="mb-0">${symbol}</h5>
+    <div id = "companyName" class="mb-1 text-muted">${companyName}</div>
+    <div id = "primaryExchange" class="mb-1 text-muted">${primaryExchange}</div>
+    <p id = "close" class="mb-auto">${close}</p>
+    <a href="#" onClick="save_stock()" class="stretched-link">관심종목 추가</a>
+    </div>`;
+
+    $('#main-right').prepend(temp_html);
+}
+
+function show_stock(symbol) {
+
+    let token = "pk_31c6148666914eaf9e526964898f75ab";
+
+    $('#main-right').empty();
+    
+    get_stock_value(symbol, token);
+    get_stock_info(symbol, token);
+
+}
+
+function save_stock(){
+    
+    let companyName = $('#companyName').text();
+    let symbol = $('#symbol').text();
+    let primaryExchange = $('#primaryExchange').text();
+    let close = $('#close').text();
+    let industry = $('#industry').text();
+    let website = $('#website').text();
+    let sector = $('#sector').text();
+    let description = $('#description').text();
+
+    $.ajax({
+        type: "POST",
+        url: "/stock",
+        data: { companyName: companyName, symbol : symbol, primaryExchange : primaryExchange, close : close, 
+            industry : industry, website : website, sector : sector, description : description },
+        success: function (response) {
+            if (response['result'] == 'success') {
+                alert('관심종목에 추가 완료')
+            }
+        }
+    })
+}
+
