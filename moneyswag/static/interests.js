@@ -39,9 +39,9 @@ function make_card(name, symbol, exchange, price, id) {
           <div class="btn-group">
             <form action = "/dashboard" method = "POST">
               <input type = "hidden" name = "symbol" value = "${symbol}">
-              <p><input type = "submit" value = "보기" /></p>
+              <p><input class = "size" type = "submit" value = "보기" /></p>
             </form>
-            <button id = "${id}" onClick = "delete_stock(this.id)" type="button" class="btn btn-sm btn-outline-secondary">삭제</button>
+            <button id = "${id}" onClick = "delete_stock(this.id)" type="button" class="btn btn-sm btn-outline-secondary size">삭제</button>
             </div>
           <small class="text-muted">9 mins</small>
         </div>

@@ -268,7 +268,6 @@ function get_total_sell_record () {
       //왜 이것만 리스트로 왔는지 모르겠다.
 
       temp = response[1]['get_total_sell'];
-      console.log(temp);
 
       //아직 매도종합 데이터가 없을 경우
       if (temp == null)
@@ -284,8 +283,37 @@ function get_total_sell_record () {
   })
 }
 
+
 function graph() {
   'use strict'
+
+  let symbol = $('#stock_symbol').text();
+  //과거 데이터를 먼저 가져온다.
+  url = `https://finance.yahoo.com/quote/${symbol}/history?p=${symbol}`;
+
+  //과거 데이터 받아올 변수
+  let temp;
+  $.ajax({
+    type: "POST",
+    url: "/stock_price",
+    async: false,
+    data: { url_give: url },
+    success: function (response) { // 성공하면
+
+      temp = response['dictionary'];
+      //temp.forEach(curr => list_price(curr['date'], curr['open'], curr['close'], curr['low'], curr['high'], curr['volume']));
+
+    }
+  })
+  
+  let x = [];
+  let y = [];
+  for (let j = 0, i = temp.length - 1; i >= 0; j++, i--){
+    x[j] = temp[i]['close'];
+    y[j] = temp[i]['date'];
+  }
+
+  console.log(x);
 
   feather.replace()
 
@@ -295,25 +323,9 @@ function graph() {
   var myChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: [
-        '선데이',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday'
-      ],
+      labels: y,
       datasets: [{
-        data: [
-          15339,
-          21345,
-          18483,
-          24003,
-          23489,
-          24092,
-          12034
-        ],
+        data: x,
         lineTension: 0,
         backgroundColor: 'transparent',
         borderColor: '#007bff',

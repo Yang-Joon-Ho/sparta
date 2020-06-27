@@ -1,9 +1,8 @@
 $(document).ready(function () {
-
+    
+    post_index(); //각 시장의 지수 가져오기
     save_article();
     get_article();
-    post_index();
-    get_index();
 
 });
 
@@ -57,44 +56,45 @@ function make_card(url, image, title, desc) {
 
 function post_index() {
 
+    //다우, 나스닥 지수 db에 저장
     $.ajax({
         type: "POST",
         url: "/index",
-        data: { url_give: 'https://kr.investing.com/indices/us-30' },
+        data: { url_give_dow: 'https://kr.investing.com/indices/us-30', url_give_nasdaq : 'https://kr.investing.com/indices/nq-100'},
         success: function (response) {
             if (response['result'] == 'success') {
+                let index = response['result_index'];
+                make_index_dow(index[0]['index'], index[0]['change'], index[0]['percent'], index[0]['date']);
+                make_index_nasdaq(index[1]['index'], index[1]['change'], index[1]['percent'], index[1]['date']);
             }
         }
     })
 }
 
-function get_index() {
-
-    $.ajax({
-        type: "GET",
-        url: "/index",
-        data: {},
-        success: function (response) {
-            if (response['result'] == 'success') {
-                let index = response['dow_index']
-                make_index(index['dow_index'], index['date']);
-            }
-        }
-    })
-}
-
-function make_index(index, date) {
+function make_index_dow(index, change, percent, date) {
 
     let temp_html = `<div class="col p-4 d-flex flex-column position-static">
-        <strong class="d-inline-block mb-2 text-primary">다우 지수</strong>
+        <strong class="d-inline-block mb-2 text-primary">다우 존스</strong>
         <h3 class="mb-0">${index}</h3>
         <div class="mb-1 text-muted">${date}</div>
-        <p class="card-text mb-auto">This is a wider card with supporting text below as a natural
-                    lead-in to additional content.</p>
-        <a href="#" class="stretched-link">Continue reading</a>
+        <p class="card-text mb-auto">${change}</p>
+        <p class="card-text mb-auto">${percent}</p>
     </div>`;
 
-    $('#index-card').append(temp_html);
+    $('#dow-index-card').append(temp_html);
+}
+
+function make_index_nasdaq(index, change, percent, date) {
+
+    let temp_html = `<div class="col p-4 d-flex flex-column position-static">
+        <strong class="d-inline-block mb-2 text-primary">나스닥</strong>
+        <h3 class="mb-0">${index}</h3>
+        <div class="mb-1 text-muted">${date}</div>
+        <p class="card-text mb-auto">${change}</p>
+        <p class="card-text mb-auto">${percent}</p>
+    </div>`;
+
+    $('#nasdaq-index-card').append(temp_html);
 }
 
 function search() {
