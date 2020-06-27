@@ -8,6 +8,11 @@ $(document).ready(function () {
   stock_price(symbol);
   current_price(symbol);
   order_record(symbol);
+  //매도 기록 가져오기
+  get_sell_record();
+  //매도 종합 데이터 가져오기
+  get_total_sell_record();
+  //매수 종합 데이터 가져오기
   get_total();
   graph();
 });
@@ -80,7 +85,8 @@ function current_price(symbol) {
 
       let temp = response['price_rate'];
 
-      let cal = $('#get_total_total').text() - $('#get_total_quantity').text() * temp['price'];
+      //get_total_total은 '매수종합'에서 총 매수가
+      let cal = $('#get_total_quantity').text() * temp['price'] - $('#get_total_total').text();
 
       $('#price').append(temp['price']);
       $('#rate').append(temp['rate']);
@@ -88,7 +94,7 @@ function current_price(symbol) {
     }
   })
 
-  timer = setTimeout(current_price, 1000, symbol);
+  //timer = setTimeout(current_price, 1000, symbol);
 }
 
 function calculate() {
@@ -102,15 +108,17 @@ function calculate() {
 
 }
 
+//매수/ 매도 주문 
 function buy() {
 
-  let symbol = $('#stock_symbol').text()
+  let symbol = $('#stock_symbol').text();
+  let method = $('#buy_sell').val();
   let date = $('#input_date').val();
   let price = $('#input_price').val();
   let quantity = $('#input_quantity').val();
   let total = $('#total_price').text();
 
-  let inputBox = [['date', date], ['price', price], ['quantity', quantity], ['total', total]];
+  let inputBox = [['method', method], ['date', date], ['price', price], ['quantity', quantity], ['total', total]];
   let i;
   for (i = 0; i < inputBox.length; i++) {
 
@@ -120,20 +128,28 @@ function buy() {
     }
   }
 
+  if(method == '매도' && quantity > $('#get_total_quantity').text()) {
+    
+    $('#total_price').empty();
+    alert('매도 수량을 보유 수량보다 작거나 같게 입력해라')
+    return;
+  }
+
 
   $.ajax({
     type: "POST",
     url: "/order",
-    data: { symbol_give: symbol, date_give: date, price_give: price, quantity_give: quantity, total_give: total },
+    data: { symbol_give: symbol, method_give : method, date_give: date, price_give: price, quantity_give: quantity, total_give: total },
     success: function (response) { // 성공하면
 
       if (response['result'] == 'success')
         alert('주문 완료');
       order_record(symbol);
+      current_price(symbol);
+      get_sell_record();
+      get_total_sell_record ();
     }
   })
-
-
 }
 
 function order_record(symbol) {
@@ -162,6 +178,7 @@ function get_total() {
   $.ajax({
     type: "POST",
     url: "/get_total",
+    async: false,
     data: { symbol_give: symbol },
     success: function (response) { // 성공하면
 
@@ -172,7 +189,7 @@ function get_total() {
       temp = response[1]['get_total'];
 
       //아직 매수종합 데이터가 없을 경우
-      if(temp == null)
+      if (temp == null)
         return;
 
       let temp_html = `<tr>
@@ -200,48 +217,72 @@ function list_orders(id, date, price, quantity, total) {
 
 }
 
-function sell_stock(id) {
+//매도 기록 불러오기
+function get_sell_record () {
+  
+  let symbol = $('#stock_symbol').text()
 
-  let today = new Date();
+  $.ajax({
+    type: "POST",
+    url: "/get_sell_record",
+    data: { symbol_give: symbol },
+    success: function (response) { // 성공하면
 
-  let year = today.getFullYear(); // 년도
-  let month = today.getMonth() + 1;  // 월
-  let date = today.getDate();  // 날짜
+      $('#sell_record').empty();
+      temp = response['orders'];
 
-  let day = year + '/' + month + '/' + date;
+      // 개별 매도 기록
+      temp.forEach(curr => list_orders_sell( curr['date'], curr['price'], curr['quantity'], curr['total'], curr['profit']));
 
-
-
-  // $.ajax({
-  //   type: "POST",
-  //   url: "/sell_stock",
-  //   async: false,
-  //   data: { symbol_give: symbol, date_give: date, price_give: price, quantity_give: quantity, total_give: total },
-  //   success: function (response) {
-  //     if (response['result'] == 'success') {
-  //       alert('삭제 완료');
-  //       window.location.reload();
-  //     } else {
-  //       alert('서버 오류');
-  //     }
-  //   }
-  // })
-
-  // $.ajax({
-  //   type: "DELETE",
-  //   url: "/sell_stock",
-  //   data: { id_give: id },
-  //   success: function (response) {
-  //     if (response['result'] == 'success') {
-  //       alert('삭제 완료');
-  //       window.location.reload();
-  //     } else {
-  //       alert('서버 오류');
-  //     }
-  //   }
-  // })
+      //get_total();
+    }
+  })
 }
 
+function list_orders_sell(date, price, quantity, total, profit) {
+
+  let temp_html = `<tr>
+    <td>${date}</td>
+    <td>${price}</td>
+    <td>${quantity}</td>
+    <td>${total}</td>
+    <td>${profit}</td>
+  </tr>`
+
+  $('#sell_record').append(temp_html);
+}
+
+//매도 종합 데이터 가져오기
+function get_total_sell_record () {
+
+  let symbol = $('#stock_symbol').text()
+  
+  $.ajax({
+    type: "POST",
+    url: "/get_total_sell_record",
+    data: { symbol_give: symbol },
+    success: function (response) { // 성공하면
+
+      $('#stock_total_sell').empty();
+
+      //왜 이것만 리스트로 왔는지 모르겠다.
+
+      temp = response[1]['get_total_sell'];
+      console.log(temp);
+
+      //아직 매도종합 데이터가 없을 경우
+      if (temp == null)
+        return;
+
+      let temp_html = `<tr>
+      <td>${temp['quantity']}</td>
+      <td>${temp['profit']}</td>
+    </tr>`;
+
+      $('#stock_total_sell').append(temp_html);
+    }
+  })
+}
 
 function graph() {
   'use strict'

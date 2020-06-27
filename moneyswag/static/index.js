@@ -11,6 +11,7 @@ function save_article() {
     $.ajax({
         type: "POST",
         url: "/article",
+        sync: false,
         data: { url_give: 'https://kr.investing.com/news/most-popular-news' },
         success: function (response) {
             if (response['result'] == 'success') {

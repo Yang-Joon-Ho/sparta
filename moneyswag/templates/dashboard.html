@@ -159,6 +159,17 @@
 
         <div class="row">
           <div class="col-md-5 mb-3">
+            <label for="buy_sell">매도/매수</label>
+            <select class="custom-select d-block w-100" id="buy_sell" required>
+              <option value="">Choose...</option>
+              <option>매수</option>
+              <option>매도</option>
+            </select>
+            <div class="invalid-feedback">
+              Please select a valid.
+            </div>
+          </div>
+          <div class="col-md-5 mb-3">
             <label for="date">매수 날짜</label>
             <input type="date" class="form-control" id="input_date" placeholder="2020-xx-xx">
             <div class="invalid-feedback">
@@ -191,6 +202,7 @@
         </div>
 
 
+
         <div class="row">
           <div class="col-md-6 font-italic">
             <h2>매수 기록</h2>
@@ -215,7 +227,7 @@
               </table>
             </div>
 
-            <h2>종합</h2>
+            <h2>매수 종합</h2>
             <div class="table-responsive">
               <table class="table table-striped table-sm">
                 <thead>
@@ -259,6 +271,25 @@
                 </tbody>
               </table>
             </div>
+
+            <h2>매도 종합</h2>
+            <div class="table-responsive">
+              <table class="table table-striped table-sm">
+                <thead>
+                  <tr>
+                    <th>총 매도 수량</th>
+                    <th>총 손익</th>
+                  </tr>
+                </thead>
+                <tbody id="stock_total_sell">
+                  <tr>
+                    <td>1,001</td>
+                    <td>Lorem</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
           </div>
         </div>
 

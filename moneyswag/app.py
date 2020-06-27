@@ -43,7 +43,7 @@ def stock_detail():
 @app.route('/article', methods=['GET'])
 def listing():
 
-    article = db.articles.find_one({}, {'_id' : 0})
+    article = db.stock_articles.find_one({}, {'_id' : 0})
     return jsonify({'result':'success', 'articles':article})
 
     # 1. 모든 document 찾기 & _id 값은 출력에서 제외하기
@@ -70,8 +70,8 @@ def saving():
     
     #db에 동일한 기사가 없다면 
     # if title != db.articles.find_one({})['title']:
-    if db.articles.find_one({'title' : title}) is None:
-        db.articles.delete_many({})
+    if db.stock_articles.find_one({'title' : title}) is None:
+        db.stock_articles.delete_many({})
         description = temp_url.select_one('p').text
         url_url = 'https://kr.investing.com' + temp_url.select_one('a')['href'] #한번 더 들어갈 기사 주소
        
@@ -83,7 +83,7 @@ def saving():
         article = {'url': url_url, 'image': url_image,
                     'title': title, 'desc': description}
 
-        db.articles.insert_one(article)
+        db.stock_articles.insert_one(article)
 
 
     return jsonify({'result': 'success', 'msg':'POST 연결되었습니다!'})
@@ -254,7 +254,7 @@ def stock_price():
         return jsonify({'result' : 'fail'})
     else :
         return jsonify({'result' : 'success', 'dictionary' : datas})
-    
+
 
 @app.route('/current_price', methods=['POST'])
 def current_price():
@@ -276,34 +276,82 @@ def current_price():
     
     return jsonify({'result' : 'succcess', 'price_rate' : price_rate})
 
+# 주식 주문 (매도 혹은 매수)
 @app.route('/order', methods=['POST'])
 def save_order():
     
     symbol_receive = request.form['symbol_give']
+    method_receive = request.form['method_give']
     price_receive = float(request.form['price_give'])
     date_receive = request.form['date_give']
     quantity_receive = int(request.form['quantity_give'])
     total_receive = float(request.form['total_give'])
 
-    stock = {'symbol': symbol_receive, 'price': price_receive,
-                'date': date_receive, 'quantity': quantity_receive,
-                'total' : total_receive }
+    if method_receive == '매수':
 
-    db.stock_orders.insert_one(stock)
-    
-    temp = list(db.stock_total.find({'symbol' : symbol_receive}, {'_id' : 0}))
-    if len(temp) == 0:
-        total = {'symbol' : symbol_receive, 'price' : price_receive, 'quantity': quantity_receive, 'total' : total_receive}
-        db.stock_total.insert_one(total)
-    else :
-        #평균 단가 구해야함ㅋㅋ
-        before = db.stock_total.find_one({'symbol' : symbol_receive}, {'_id' : 0})
-        total_price_temp = before['price'] * before['quantity'] + total_receive
-        total_quantity_temp = before['quantity'] + quantity_receive
-        total_total_temp = before['total'] + total_receive 
+        stock = {'symbol': symbol_receive, 'price': price_receive,
+                    'date': date_receive, 'quantity': quantity_receive,
+                    'total' : total_receive }
 
-        price = total_price_temp / total_quantity_temp 
-        db.stock_total.update_one({'symbol' : symbol_receive}, { '$set' : { 'price' : price, 'quantity' : total_quantity_temp, 'total' : total_total_temp} })
+        db.stock_orders.insert_one(stock)
+        
+        temp = list(db.stock_total.find({'symbol' : symbol_receive}, {'_id' : 0}))
+        if len(temp) == 0:
+            total = {'symbol' : symbol_receive, 'price' : price_receive, 'quantity': quantity_receive, 'total' : total_receive}
+            db.stock_total.insert_one(total)
+        else :
+            #평균 단가 구해야함ㅋㅋ
+            before = db.stock_total.find_one({'symbol' : symbol_receive}, {'_id' : 0})
+            total_price_temp = before['price'] * before['quantity'] + total_receive
+            total_quantity_temp = before['quantity'] + quantity_receive
+            total_total_temp = before['total'] + total_receive 
+
+            price = total_price_temp / total_quantity_temp 
+            db.stock_total.update_one({'symbol' : symbol_receive}, { '$set' : { 'price' : price, 'quantity' : total_quantity_temp, 'total' : total_total_temp}})
+
+    elif method_receive == '매도':
+
+        #매도 시에는 실현 손익이 추가되어야 함 
+        #실현 손익 = 매도 금액(total) - 매수 평균 단가 * 매도 수량(quantity)
+        
+        #매수 종합도 갱신되어야 함
+        #매수 종합 데이터를 가져온다.
+        tempo = db.stock_total.find_one({'symbol' : symbol_receive}, {'_id' : 0})
+        #매수 평균 단가를 변수에 저장
+        tempo_price = tempo['price']
+        #매수 평균 단가 * 매도 수량
+        modify_total = tempo_price * quantity_receive
+
+
+        #매도 실현 손익 계산 
+        profit = total_receive - quantity_receive * db.stock_total.find_one({'symbol' : symbol_receive}, {'price' : 1, '_id' : 0})['price']
+        
+        stock = {'symbol': symbol_receive, 'price': price_receive,
+                    'date': date_receive, 'quantity': quantity_receive,
+                    'total' : total_receive, 'profit' : profit }
+
+        db.stock_orders_sell.insert_one(stock)
+
+        #매도 종합에는 총 매도 수량, 총 손익만 적으면 됨
+        temp = list(db.stock_total_sell.find({'symbol' : symbol_receive}, {'_id' : 0}))
+        if len(temp) == 0:
+
+            total = {'symbol' : symbol_receive, 'quantity': quantity_receive, 'profit' : profit}
+            db.stock_total_sell.insert_one(total)
+        
+        else :
+            #실현 손익 구해야 함 
+            db.stock_total_sell.update_one({'symbol' : symbol_receive}, { '$inc' : { 'quantity' : +quantity_receive, 'profit' : +profit}})
+
+        
+        #만약 매도 주문 이후 보유 주식 수량이 0이면 매수 종합에서 해당 데이터를 지워줘야 함
+        temp_quantity = db.stock_total.find_one({'symbol' : symbol_receive}, {'quantity' : 1,'_id' : 0})['quantity']
+
+        if temp_quantity - quantity_receive <= 0:
+            db.stock_total.delete_one({'symbol': symbol_receive})
+
+        #매수 종합에서 매수 종합 수량과 가격을 업데이트함
+        db.stock_total.update_one({'symbol' : symbol_receive}, { '$inc' : {'quantity' : -quantity_receive, 'total' : -modify_total}})
 
 
     return jsonify({'result' : 'success'})
@@ -317,7 +365,7 @@ def get_total():
 
     return jsonify({'result' : 'success'}, {'get_total' : result})
 
-
+#매수 리스트 받아오기
 @app.route('/get_order', methods=['POST'])
 def get_order():
 
@@ -326,14 +374,25 @@ def get_order():
 
     return jsonify({'result' : 'success', 'orders' : orders})
 
+# 매도 리스트 받아오기
+@app.route('/get_sell_record', methods=['POST'])
+def get_sell_record():
 
-@app.route('/sell_stock', methods=['DELETE'])
-def sell_stock():
+    symbol_receive = request.form['symbol_give']
+    orders = list(db.stock_orders_sell.find({'symbol' : symbol_receive}, {'_id' : 0}))
 
-    id_receive = ObjectId(request.form['id_give'])
-    db.stock_orders.delete_one({'_id' : id_receive})
-    
-    return jsonify({'result' : 'success'})
+    return jsonify({'result' : 'success', 'orders' : orders})
+
+
+#'매도 종합' 반환하는 함수 
+@app.route('/get_total_sell_record', methods=['POST'])
+def get_total_sell_record():
+
+    symbol_receive = request.form['symbol_give']
+    result = db.stock_total_sell.find_one({'symbol' : symbol_receive}, {'_id' : 0})
+
+    return jsonify({'result' : 'success'}, {'get_total_sell' : result})
+
 
 if __name__ == '__main__':
    app.run('0.0.0.0',port=5000,debug=True)
