@@ -11,17 +11,17 @@ client = MongoClient('localhost', 27017)  # mongoDB는 27017 포트로 돌아갑
 db = client.dbsparta                      # 'dbsparta'라는 이름의 db를 만듭니다.
 
 ##################################### 셀레니움
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support import expected_conditions
-from selenium.common.exceptions import ElementNotVisibleException
+# from selenium import webdriver
+# from selenium.webdriver.common.keys import Keys
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.support import expected_conditions
+# from selenium.common.exceptions import ElementNotVisibleException
 
 #웹 드라이버 설정
-path = "D:/chromedriver_win32/chromedriver"
-driver = webdriver.Chrome(path)
+# path = "D:/chromedriver_win32/chromedriver"
+# driver = webdriver.Chrome(path)
 ##############################################
 
 
@@ -129,12 +129,18 @@ def stock_searching():
     stock_receive = request.form['stock_give']
     url_receive = request.form['url_give']
     
-    search_url = url_receive + stock_receive     
+    #url 준비
+    search_url = url_receive + stock_receive    
 
-    driver.get(search_url)
-        
-    html = driver.page_source
-    soup = BeautifulSoup(html, 'html.parser')
+    #스크랩
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+    data = requests.get(search_url, headers=headers)
+    soup = BeautifulSoup(data.text, 'html.parser') 
+
+    #beautifulsoup 예시
+    #driver.get(search_url)   
+    #html = driver.page_source
+    #soup = BeautifulSoup(html, 'html.parser')
 
     stocks = soup.select('#fullColumn > div > div > div > div > a')
     
@@ -155,12 +161,6 @@ def stock_searching():
     else :
         return jsonify({'result' : 'success', 'dictionary' : datas})
 
-    #stock = db.stocks.find_one({'name' : stock_receive}, {'_id' : 0})
-
-    # if stock is None:
-    #     return jsonify({'result' : 'fail', 'msg' : '니가 검색한 종목 없음ㅋㅋ'})
-    # else:
-    #     return jsonify({'result' : 'success', 'stock' : stock})
 
 @app.route('/stock', methods=['POST'])
 def stock_saving():
