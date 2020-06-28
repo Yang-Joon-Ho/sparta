@@ -18,6 +18,7 @@
 
   <!-- Custom styles for this template -->
   <link rel="stylesheet" href="{{url_for('static', filename='dashboard.css')}}" />
+  <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}" />
 
   <style>
     .bd-placeholder-img {
@@ -195,7 +196,7 @@
 
         <div class="col-md-3 mb-3">
           <input onclick="calculate()" class="button_style" type="button" name="order" value="계산">
-          <span>$ </span><span id="total_price"></span>
+          <span class = "exchange" >$ </span><span class = "exchange" id="total_price"></span>
         </div>
         <div class="col-md-3 mb-3">
           <input onclick="buy()" class="button_style" type="button" name="buy" value="주문">
@@ -294,7 +295,7 @@
         </div>
 
 
-        <h2>Section title</h2>
+        <h2>과거 주가</h2>
         <div class="table-responsive">
           <table class="table table-striped table-sm">
             <thead>

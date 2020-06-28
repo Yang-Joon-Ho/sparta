@@ -281,7 +281,7 @@ def current_price():
 
     price_rate = {'price' : price, 'rate' : rate}
     
-    return jsonify({'result' : 'succcess', 'price_rate' : price_rate})
+    return jsonify({'result' : 'success', 'price_rate' : price_rate})
 
 # 주식 주문 (매도 혹은 매수)
 @app.route('/order', methods=['POST'])
@@ -400,6 +400,28 @@ def get_total_sell_record():
 
     return jsonify({'result' : 'success'}, {'get_total_sell' : result})
 
+# #관심 종목에 추가된 종목 실시간 주가 가져오기
+# @app.route('/interest_price', methods=['POST'])
+# def interest_price():
+
+#     # url 받아오기
+#     url_receive = request.form['url_give']
+    
+#     # 현재 주가 데이터 가져오기 
+#     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+#     data = requests.get(url_receive, headers=headers)
+#     soup = BeautifulSoup(data.text, 'html.parser')
+    
+#     # 주가 변동 사항 가져오기
+#     prices = soup.select('#quote-header-info > div > div > div > span')
+    
+#     price = prices[1].text
+#     rate = prices[2].text
+
+#     price_rate = {'price' : price, 'rate' : rate}
+
+
+#     return jsonify({'result' : 'success', 'price_rate' : price_rate})
 
 if __name__ == '__main__':
    app.run('0.0.0.0',port=5000,debug=True)

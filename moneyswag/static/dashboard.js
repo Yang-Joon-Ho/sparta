@@ -87,14 +87,41 @@ function current_price(symbol) {
 
       //get_total_total은 '매수종합'에서 총 매수가
       let cal = $('#get_total_quantity').text() * temp['price'] - $('#get_total_total').text();
+      
+      append_price_rate(temp['price'], temp['rate']);
 
-      $('#price').append(temp['price']);
-      $('#rate').append(temp['rate']);
+      // $('#price').append(temp['price']);
+      // $('#rate').append(temp['rate']);
       $('#profit').append(cal);
     }
   })
 
   //timer = setTimeout(current_price, 1000, symbol);
+}
+
+// 전날 대비 종가가 마이너스인지 플러스인지에 따라 색깔 달리 함.
+function append_price_rate (price, rate) {
+
+  temp_temp_rate = rate.split(" ");
+  //temp_temp_rate = [x, x%] 
+
+  //console.log(temp_temp_rate);  
+  if ( temp_temp_rate[0] == 0) { 
+    temp_price = `<h3 class = "exchange">$ ${price}</h3>`;
+    temp_rate = `<h3 class = "exchange"> ${rate}</h3>`;
+  }
+  else if ( temp_temp_rate[0] < 0) { 
+    temp_price = `<h3 class = "exchange-blue">$ ${price}</h3>`;
+    temp_rate = `<h3 class = "exchange-blue"> ${rate}</h3>`;
+  }
+  else { 
+    temp_price = `<h3 class = "exchange-red">$ ${price}</h3>`;
+    temp_rate = `<h3 class = "exchange-red"> ${rate}</h3>`;
+  }
+
+  $('#price').append(temp_price);
+  $('#rate').append(temp_rate);
+
 }
 
 function calculate() {
@@ -240,7 +267,7 @@ function get_sell_record () {
 }
 
 function list_orders_sell(date, price, quantity, total, profit) {
-
+  
   let temp_html = `<tr>
     <td>${date}</td>
     <td>${price}</td>
@@ -282,7 +309,6 @@ function get_total_sell_record () {
     }
   })
 }
-
 
 function graph() {
   'use strict'
