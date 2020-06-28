@@ -170,7 +170,7 @@
             </div>
           </div>
           <div class="col-md-5 mb-3">
-            <label for="date">매수 날짜</label>
+            <label for="date">주문 날짜</label>
             <input type="date" class="form-control" id="input_date" placeholder="2020-xx-xx">
             <div class="invalid-feedback">
               Please enter a valid date.
@@ -190,18 +190,18 @@
               수량을 입력하세요
             </div>
           </div>
-          <div class="col-md-3 mb-3">
-            <input onclick="calculate()" class="button_style" type="button" name="order" value="계산">
-          </div>
-          <div class="col-md-3 mb-3">
-            <input onclick="buy()" class="button_style" type="button" name="buy" value="매수">
-          </div>
           <!-- 버튼 타입으로 submit을 사용할 수도있는데 submit은 뭔가 전달할때 사용하는 용도이다. -->
-
-          <span>$ </span><span id="total_price"></span>
         </div>
 
+        <div class="col-md-3 mb-3">
+          <input onclick="calculate()" class="button_style" type="button" name="order" value="계산">
+          <span>$ </span><span id="total_price"></span>
+        </div>
+        <div class="col-md-3 mb-3">
+          <input onclick="buy()" class="button_style" type="button" name="buy" value="주문">
+        </div>
 
+        
 
         <div class="row">
           <div class="col-md-6 font-italic">
