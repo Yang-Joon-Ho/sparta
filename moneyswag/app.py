@@ -95,28 +95,24 @@ def index_saving():
     
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
 
-    url_receive = [request.form['url_give_dow'], request.form['url_give_nasdaq']]
+    url_receive = request.form['url_give']
     #반환할 리스트
-    result_index = list()
-
-    for i in range(0, 2):
-        
-        # 지수 가져오기    
-        #url_receive = request.form['url_give_dow']
-        data = requests.get(url_receive[i], headers=headers)
-        soup = BeautifulSoup(data.text, 'html.parser')
+  
+    # 지수 가져오기    
+    #url_receive = request.form['url_give_dow']
+    data = requests.get(url_receive, headers=headers)
+    soup = BeautifulSoup(data.text, 'html.parser')
             
-        temp_index = soup.select_one('#last_last').text
+    temp_index = soup.select_one('#last_last').text
 
-        # 날짜 가져오기
-        temp_date = soup.select_one('#quotes_summary_current_data > div > div > div > span.bold').text
-        # 전날 대비 +/- 수치 가져오기
-        temp_change = soup.select_one('#quotes_summary_current_data > div > div > div > span.arial_20').text
-        temp_percent = soup.select_one('#quotes_summary_current_data > div > div > div > span.arial_20.redFont.parentheses').text
+    # 날짜 가져오기
+    temp_date = soup.select_one('#quotes_summary_current_data > div > div > div > span.bold').text
+    # 전날 대비 +/- 수치 가져오기
+    temp_change = soup.select_one('#quotes_summary_current_data > div > div > div > span.arial_20').text
+    temp_percent = soup.select_one('#quotes_summary_current_data > div > div > div > span.arial_20.parentheses').text
     
                 
-        result_index.append({ 'index' : temp_index, 'date' : temp_date, 'change' : temp_change, 'percent' : temp_percent})
-
+    result_index = { 'index' : temp_index, 'date' : temp_date, 'change' : temp_change, 'percent' : temp_percent}
 
     return jsonify({'result': 'success', 'result_index' : result_index})
 

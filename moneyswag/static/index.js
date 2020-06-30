@@ -1,10 +1,32 @@
 $(document).ready(function () {
 
-    post_index(); //각 시장의 지수 가져오기
+    post_dow_index(); //각 시장의 지수 가져오기
+    post_nasdaq_index();
     save_article();
     get_article();
 
+    get_time();
 });
+
+function get_time() {
+
+    //현재 시간 구하기
+    let now = new Date();
+    let hour = now.getHours();
+    let minutes = now.getMinutes();
+
+    if ((minutes + "").length < 2) {
+        minutes = "0" + minutes;
+    }
+
+    time = hour + "" + minutes;
+    if (time >= 930 || time <= 500) {
+
+        post_dow_index(); //각 시장의 지수 가져오기
+        post_nasdaq_index();
+        timer = setTimeout(get_time, 1000);
+    }
+}
 
 function save_article() {
     $.ajax({
@@ -50,22 +72,26 @@ function make_card(url, image, title, desc) {
                             <p class="lead mb-0"><a href="${url}" class="text-white font-weight-bold">Contiue reading ...</a></p>
                         </div>               
                 </div>`;
-
+       
     $('#main-box').append(temp_html);
 }
 
-function post_index() {
+function post_dow_index() {
 
-    //다우, 나스닥 지수 db에 저장
+    //다우 지수 불러오기
     $.ajax({
         type: "POST",
         url: "/index",
-        data: { url_give_dow: 'https://kr.investing.com/indices/us-30', url_give_nasdaq: 'https://kr.investing.com/indices/nq-100' },
+        data: { url_give: 'https://kr.investing.com/indices/us-30' },
         success: function (response) {
             if (response['result'] == 'success') {
+
+                //서버로부터 데이터 받아와서 저장함.
                 let index = response['result_index'];
-                make_index_dow(index[0]['index'], index[0]['change'], index[0]['percent'], index[0]['date']);
-                make_index_nasdaq(index[1]['index'], index[1]['change'], index[1]['percent'], index[1]['date']);
+
+                make_index_dow(index['index'], index['change'], index['percent'], index['date']);
+                //make_index_nasdaq(index[1]['index'], index[1]['change'], index[1]['percent'], index[1]['date']);
+
             }
         }
     })
@@ -91,7 +117,7 @@ function make_index_dow(index, change, percent, date) {
         <p class="exchange card-text mb-auto">${change}</p>
         <p class="exchange card-text mb-auto">${percent}</p>
     </div>`;
-    } 
+    }
     else {
         temp_html = `<div class="col p-4 d-flex flex-column position-static">
         <strong class="d-inline-block mb-2 text-primary">다우 존스</strong>
@@ -101,8 +127,29 @@ function make_index_dow(index, change, percent, date) {
         <p class="exchange-red card-text mb-auto">${percent}</p>
     </div>`;
     }
-
+    $('#dow-index-card').empty();
     $('#dow-index-card').append(temp_html);
+}
+
+// 나스닥 지수 불러오기
+function post_nasdaq_index() {
+
+    $.ajax({
+        type: "POST",
+        url: "/index",
+        data: { url_give: 'https://kr.investing.com/indices/nq-100' },
+        success: function (response) {
+            if (response['result'] == 'success') {
+
+                //서버로부터 데이터 받아와서 저장함.
+                let index = response['result_index'];
+
+                make_index_nasdaq(index['index'], index['change'], index['percent'], index['date']);
+                //make_index_nasdaq(index[1]['index'], index[1]['change'], index[1]['percent'], index[1]['date']);
+
+            }
+        }
+    })
 }
 
 function make_index_nasdaq(index, change, percent, date) {
@@ -125,7 +172,7 @@ function make_index_nasdaq(index, change, percent, date) {
         <p class="exchange card-text mb-auto">${change}</p>
         <p class="exchange card-text mb-auto">${percent}</p>
     </div>`;
-    } 
+    }
     else {
         temp_html = `<div class="col p-4 d-flex flex-column position-static">
         <strong class="d-inline-block mb-2 text-primary">나스닥</strong>
@@ -135,7 +182,8 @@ function make_index_nasdaq(index, change, percent, date) {
         <p class="exchange-red card-text mb-auto">${percent}</p>
     </div>`;
     }
-
+    
+    $('#nasdaq-index-card').empty();
     $('#nasdaq-index-card').append(temp_html);
 }
 

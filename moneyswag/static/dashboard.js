@@ -6,34 +6,37 @@ $(document).ready(function () {
   let symbol = $('#stock_symbol').text();
 
   stock_price(symbol);
-  current_price(symbol);
+  //매수 기록 가져오기
   order_record(symbol);
   //매도 기록 가져오기
   get_sell_record();
   //매도 종합 데이터 가져오기
   get_total_sell_record();
-  //매수 종합 데이터 가져오기
-  get_total();
   graph();
+
+  //시간 구하는 함수 
+  get_time(symbol);
 });
 
+//장중일때만 현재가격을 가져오도록 한다. 
+function get_time(symbol) {
+  //현재 시간 구하기
+  let now = new Date();
+  let hour = now.getHours();
+  let minutes = now.getMinutes();
 
-// let stock_info;
+  if ((minutes + "").length < 2) {
+    minutes = "0" + minutes;
+  }
 
-//     url = `https://cloud.iexapis.com/stable/stock/${symbol}/company?token=${token}`
-//     console.log(url);
-//     $.ajax({
-//         type: "GET",
-//         url: url,
-//         async: false,
-//         data: {},
-//         success: function (response) { // 성공하면
-//             show_stock_info(response['industry'], response['website'], response['description'], response['sector']);
-//             stock_info = {'industry' : response['industry'], 
-//             'website': response['website'], 'description' :  response['description'], 'sector' : response['sector']};
-//         }
-//     })
-
+  time = hour +""+ minutes;
+  if(time >= 2230 || time <= 500){
+    console.log(time);
+    current_price(symbol);
+    console.log(time);
+    timer = setTimeout(get_time, 1000, symbol);
+  }
+}
 
 function stock_price(symbol) {
 
@@ -87,7 +90,7 @@ function current_price(symbol) {
 
       //get_total_total은 '매수종합'에서 총 매수가
       let cal = $('#get_total_quantity').text() * temp['price'] - $('#get_total_total').text();
-      
+
       append_price_rate(temp['price'], temp['rate']);
 
       // $('#price').append(temp['price']);
@@ -100,21 +103,21 @@ function current_price(symbol) {
 }
 
 // 전날 대비 종가가 마이너스인지 플러스인지에 따라 색깔 달리 함.
-function append_price_rate (price, rate) {
+function append_price_rate(price, rate) {
 
   temp_temp_rate = rate.split(" ");
   //temp_temp_rate = [x, x%] 
 
   //console.log(temp_temp_rate);  
-  if ( temp_temp_rate[0] == 0) { 
+  if (temp_temp_rate[0] == 0) {
     temp_price = `<h3 class = "exchange">$ ${price}</h3>`;
     temp_rate = `<h3 class = "exchange"> ${rate}</h3>`;
   }
-  else if ( temp_temp_rate[0] < 0) { 
+  else if (temp_temp_rate[0] < 0) {
     temp_price = `<h3 class = "exchange-blue">$ ${price}</h3>`;
     temp_rate = `<h3 class = "exchange-blue"> ${rate}</h3>`;
   }
-  else { 
+  else {
     temp_price = `<h3 class = "exchange-red">$ ${price}</h3>`;
     temp_rate = `<h3 class = "exchange-red"> ${rate}</h3>`;
   }
@@ -155,8 +158,8 @@ function buy() {
     }
   }
 
-  if(method == '매도' && quantity > $('#get_total_quantity').text()) {
-    
+  if (method == '매도' && quantity > $('#get_total_quantity').text()) {
+
     $('#total_price').empty();
     alert('매도 수량을 보유 수량보다 작거나 같게 입력해라')
     return;
@@ -166,15 +169,14 @@ function buy() {
   $.ajax({
     type: "POST",
     url: "/order",
-    data: { symbol_give: symbol, method_give : method, date_give: date, price_give: price, quantity_give: quantity, total_give: total },
+    data: { symbol_give: symbol, method_give: method, date_give: date, price_give: price, quantity_give: quantity, total_give: total },
     success: function (response) { // 성공하면
 
       if (response['result'] == 'success')
         alert('주문 완료');
       order_record(symbol);
-      current_price(symbol);
       get_sell_record();
-      get_total_sell_record ();
+      get_total_sell_record();
     }
   })
 }
@@ -227,6 +229,8 @@ function get_total() {
     </tr>`;
 
       $('#stock_total').append(temp_html);
+
+      current_price(symbol); //현재가 구함과 동시에 매수종합에서 손익 계산까지 하는 함수
     }
   })
 }
@@ -245,8 +249,8 @@ function list_orders(id, date, price, quantity, total) {
 }
 
 //매도 기록 불러오기
-function get_sell_record () {
-  
+function get_sell_record() {
+
   let symbol = $('#stock_symbol').text()
 
   $.ajax({
@@ -259,7 +263,7 @@ function get_sell_record () {
       temp = response['orders'];
 
       // 개별 매도 기록
-      temp.forEach(curr => list_orders_sell( curr['date'], curr['price'], curr['quantity'], curr['total'], curr['profit']));
+      temp.forEach(curr => list_orders_sell(curr['date'], curr['price'], curr['quantity'], curr['total'], curr['profit']));
 
       //get_total();
     }
@@ -267,7 +271,7 @@ function get_sell_record () {
 }
 
 function list_orders_sell(date, price, quantity, total, profit) {
-  
+
   let temp_html = `<tr>
     <td>${date}</td>
     <td>${price}</td>
@@ -280,10 +284,10 @@ function list_orders_sell(date, price, quantity, total, profit) {
 }
 
 //매도 종합 데이터 가져오기
-function get_total_sell_record () {
+function get_total_sell_record() {
 
   let symbol = $('#stock_symbol').text()
-  
+
   $.ajax({
     type: "POST",
     url: "/get_total_sell_record",
@@ -331,10 +335,10 @@ function graph() {
 
     }
   })
-  
+
   let x = [];
   let y = [];
-  for (let j = 0, i = temp.length - 1; i >= 0; j++, i--){
+  for (let j = 0, i = temp.length - 1; i >= 0; j++, i--) {
     x[j] = temp[i]['close'];
     y[j] = temp[i]['date'];
   }
