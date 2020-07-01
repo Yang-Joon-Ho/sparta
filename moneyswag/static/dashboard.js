@@ -339,11 +339,9 @@ function graph() {
   let x = [];
   let y = [];
   for (let j = 0, i = temp.length - 1; i >= 0; j++, i--) {
-    x[j] = temp[i]['close'];
+    x[j] = parseInt(temp[i]['close'].replace(/,/g,""));
     y[j] = temp[i]['date'];
   }
-
-  console.log(x);
 
   feather.replace()
 
