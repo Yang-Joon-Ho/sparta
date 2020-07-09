@@ -4,7 +4,8 @@ $(document).ready(function () {
   //$('#stock_row').html('');
   $('#table_price').html('');
   let symbol = $('#stock_symbol').text();
-
+  
+  current_price(symbol);
   stock_price(symbol);
   //매수 기록 가져오기
   order_record(symbol);
@@ -87,11 +88,12 @@ function current_price(symbol) {
       $('#profit').empty();
 
       let temp = response['price_rate'];
+  
+      //dashboard 상단에 현재가 나타내기
+      append_price_rate(temp['price'], temp['rate']);
 
       //get_total_total은 '매수종합'에서 총 매수가
       let cal = $('#get_total_quantity').text() * temp['price'] - $('#get_total_total').text();
-
-      append_price_rate(temp['price'], temp['rate']);
 
       // $('#price').append(temp['price']);
       // $('#rate').append(temp['rate']);
@@ -333,13 +335,13 @@ function graph() {
       temp = response['dictionary'];
       //temp.forEach(curr => list_price(curr['date'], curr['open'], curr['close'], curr['low'], curr['high'], curr['volume']));
 
-    }
-  })
+    }     
+  })    
 
   let x = [];
   let y = [];
   for (let j = 0, i = temp.length - 1; i >= 0; j++, i--) {
-    x[j] = parseInt(temp[i]['close'].replace(/,/g,""));
+    x[j] = parseFloat(temp[i]['close'].replace(/,/g, ""));
     y[j] = temp[i]['date'];
   }
 
