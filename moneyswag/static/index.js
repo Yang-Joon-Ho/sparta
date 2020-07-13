@@ -20,7 +20,7 @@ function get_time() {
     }
 
     time = hour + "" + minutes;
-    if (time >= 930 || time <= 500) {
+    if (time >= 2230 || time <= 500) {
 
         post_dow_index(); //각 시장의 지수 가져오기
         post_nasdaq_index();
@@ -334,4 +334,5 @@ function save_stock() {
         }
     })
 }
+
 
