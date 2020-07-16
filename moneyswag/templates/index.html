@@ -31,6 +31,18 @@
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.5/examples/blog/">
 
+    <!-- 쿠키 사용을 위한 Jquery-cookie 임포트 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+
+    <script src="{{ url_for('static', filename='login.js')}}"></script>
     <script src="{{ url_for('static', filename='index.js')}}"></script>
     <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}" />
 
@@ -76,11 +88,14 @@
                             <path d="M21 21l-5.2-5.2" />
                         </svg>
                     </a>
-                    <a onClick="location.href='login.html'" class="btn btn-sm btn-outline-secondary" >Sign up</a>
+                    <div id="sign-up">
+                        <a onClick="location.href='login.html'"
+                            class="btn btn-sm btn-outline-secondary">Sign up</a>
+                    </div>
                 </div>
             </div>
         </header>
-        
+
         <div class="nav-scroller py-1 mb-2">
             <nav class="nav d-flex justify-content-between">
                 <a class="p-2 text-muted" href="#" onClick="location.href='interest.html'">관심 종목</a>
@@ -102,10 +117,10 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div id = "nasdaq-index-card"
+                <div id="nasdaq-index-card"
                     class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-                    
-                    
+
+
                 </div>
             </div>
         </div>

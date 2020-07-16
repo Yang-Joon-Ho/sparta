@@ -74,15 +74,22 @@ def register():
 # 저장하기 전에, pw를 sha256 방법(=단방향 암호화. 풀어볼 수 없음)으로 암호화해서 저장합니다.
 @app.route('/api/register', methods=['POST'])
 def api_register():
-   id_receive = request.form['id_give']
-   pw_receive = request.form['pw_give']
-   nickname_receive = request.form['nickname_give']
+    id_receive = request.form['id_give']
+    pw_receive = request.form['pw_give']
+    nickname_receive = request.form['nickname_give']
 
-   pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+    ######기존에 있는 id 혹은 닉네임인지 확인
+    if len(list(db.user.find({'id' : id_receive}))) != 0 :
+        return ({'result' : 'fail', 'msg' : '해당 id가 이미 존재합니다.'})
+    elif len(list(db.user.find({'nick' : nickname_receive}))) != 0 :
+        return ({'result' : 'fail', 'msg' : '해당 닉네임이 이미 존재합니다.'})
+    ######
 
-   db.user.insert_one({'id':id_receive,'pw':pw_hash,'nick':nickname_receive})
+    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
 
-   return jsonify({'result': 'success'})
+    db.user.insert_one({'id':id_receive,'pw':pw_hash,'nick':nickname_receive})
+    
+    return jsonify({'result': 'success'})
 
 # [로그인 API]
 # id, pw를 받아서 맞춰보고, 토큰을 만들어 발급합니다.
@@ -133,12 +140,11 @@ def api_valid():
       # token을 시크릿키로 디코딩합니다.
       # 보실 수 있도록 payload를 print 해두었습니다. 우리가 로그인 시 넣은 그 payload와 같은 것이 나옵니다.
       payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-      print(payload)
 
       # payload 안에 id가 들어있습니다. 이 id로 유저정보를 찾습니다.
       # 여기에선 그 예로 닉네임을 보내주겠습니다.
       userinfo = db.user.find_one({'id':payload['id']},{'_id':0})
-      return jsonify({'result': 'success','nickname':userinfo['nick']})
+      return jsonify({'result': 'success','id':userinfo['id']})
    except jwt.ExpiredSignatureError:
       # 위를 실행했는데 만료시간이 지났으면 에러가 납니다.
       return jsonify({'result': 'fail', 'msg':'로그인 시간이 만료되었습니다.'})
@@ -275,6 +281,7 @@ def stock_searching():
 @app.route('/stock', methods=['POST'])
 def stock_saving():
 
+    id = request.form['id']
     companyName = request.form['companyName']
     symbol = request.form['symbol']
     primaryExchange = request.form['primaryExchange']
@@ -284,7 +291,8 @@ def stock_saving():
     sector = request.form['sector']
     description = request.form['description']
 
-    stock = {'companyName': companyName, 'symbol': symbol,
+    stock = { 'id' : id,
+        'companyName': companyName, 'symbol': symbol,
                 'primaryExchange': primaryExchange, 'close': close,
                 'industry' : industry, 'website' : website,
                 'sector' : sector, 'desc' : description}
@@ -293,10 +301,15 @@ def stock_saving():
 
     return jsonify({'result' : 'success'})
 
+
 @app.route('/stock', methods=['GET'])
 def stock_giving():
-    stocks = objectIdDecoder(list(db.stocks.find({})))
+    token_receive = request.headers['token_give']
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+    stocks = objectIdDecoder(list(db.stocks.find({'id' : payload['id']}, {'id' : 0})))
     return jsonify({'result':'success', 'stocks':stocks})
+
 
 def objectIdDecoder(list) :
     results = []
@@ -389,6 +402,11 @@ def current_price():
 # 주식 주문 (매도 혹은 매수)
 @app.route('/order', methods=['POST'])
 def save_order():
+
+    #id 받아오기
+    token_receive = request.headers['token_give']
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
     
     symbol_receive = request.form['symbol_give']
     method_receive = request.form['method_give']
@@ -399,15 +417,16 @@ def save_order():
 
     if method_receive == '매수':
 
-        stock = {'symbol': symbol_receive, 'price': price_receive,
+        stock = { 'id' : payload['id'],
+            'symbol': symbol_receive, 'price': price_receive,
                     'date': date_receive, 'quantity': quantity_receive,
                     'total' : total_receive }
 
         db.stock_orders.insert_one(stock)
         
-        temp = list(db.stock_total.find({'symbol' : symbol_receive}, {'_id' : 0}))
+        temp = list(db.stock_total.find({'id' : payload['id'], 'symbol' : symbol_receive}, {'_id' : 0}))
         if len(temp) == 0:
-            total = {'symbol' : symbol_receive, 'price' : price_receive, 'quantity': quantity_receive, 'total' : total_receive}
+            total = {'id' : payload['id'], 'symbol' : symbol_receive, 'price' : price_receive, 'quantity': quantity_receive, 'total' : total_receive}
             db.stock_total.insert_one(total)
         else :
             #평균 단가 구해야함ㅋㅋ
@@ -417,7 +436,7 @@ def save_order():
             total_total_temp = before['total'] + total_receive 
 
             price = total_price_temp / total_quantity_temp 
-            db.stock_total.update_one({'symbol' : symbol_receive}, { '$set' : { 'price' : price, 'quantity' : total_quantity_temp, 'total' : total_total_temp}})
+            db.stock_total.update_one({'id' : payload['id'], 'symbol' : symbol_receive}, { '$set' : { 'price' : price, 'quantity' : total_quantity_temp, 'total' : total_total_temp}})
 
     elif method_receive == '매도':
 
@@ -426,7 +445,7 @@ def save_order():
         
         #매수 종합도 갱신되어야 함
         #매수 종합 데이터를 가져온다.
-        tempo = db.stock_total.find_one({'symbol' : symbol_receive}, {'_id' : 0})
+        tempo = db.stock_total.find_one({'id' : payload['id'], 'symbol' : symbol_receive}, {'_id' : 0})
         #매수 평균 단가를 변수에 저장
         tempo_price = tempo['price']
         #매수 평균 단가 * 매도 수량
@@ -434,34 +453,35 @@ def save_order():
 
 
         #매도 실현 손익 계산 
-        profit = total_receive - quantity_receive * db.stock_total.find_one({'symbol' : symbol_receive}, {'price' : 1, '_id' : 0})['price']
+        profit = total_receive - quantity_receive * db.stock_total.find_one({'id' : payload['id'], 'symbol' : symbol_receive}, {'price' : 1, '_id' : 0})['price']
         
-        stock = {'symbol': symbol_receive, 'price': price_receive,
+        stock = { 'id' : payload['id'],
+            'symbol': symbol_receive, 'price': price_receive,
                     'date': date_receive, 'quantity': quantity_receive,
                     'total' : total_receive, 'profit' : profit }
 
         db.stock_orders_sell.insert_one(stock)
 
         #매도 종합에는 총 매도 수량, 총 손익만 적으면 됨
-        temp = list(db.stock_total_sell.find({'symbol' : symbol_receive}, {'_id' : 0}))
+        temp = list(db.stock_total_sell.find({'id' : payload['id'], 'symbol' : symbol_receive}, {'_id' : 0}))
         if len(temp) == 0:
 
-            total = {'symbol' : symbol_receive, 'quantity': quantity_receive, 'profit' : profit}
+            total = {'id' : payload['id'], 'symbol' : symbol_receive, 'quantity': quantity_receive, 'profit' : profit}
             db.stock_total_sell.insert_one(total)
         
         else :
             #실현 손익 구해야 함 
-            db.stock_total_sell.update_one({'symbol' : symbol_receive}, { '$inc' : { 'quantity' : +quantity_receive, 'profit' : +profit}})
+            db.stock_total_sell.update_one({'id' : payload['id'], 'symbol' : symbol_receive}, { '$inc' : { 'quantity' : +quantity_receive, 'profit' : +profit}})
 
         
         #만약 매도 주문 이후 보유 주식 수량이 0이면 매수 종합에서 해당 데이터를 지워줘야 함
-        temp_quantity = db.stock_total.find_one({'symbol' : symbol_receive}, {'quantity' : 1,'_id' : 0})['quantity']
+        temp_quantity = db.stock_total.find_one({'id' : payload['id'], 'symbol' : symbol_receive}, {'quantity' : 1,'_id' : 0})['quantity']
 
         if temp_quantity - quantity_receive <= 0:
-            db.stock_total.delete_one({'symbol': symbol_receive})
+            db.stock_total.delete_one({'id' : payload['id'], 'symbol': symbol_receive})
 
         #매수 종합에서 매수 종합 수량과 가격을 업데이트함
-        db.stock_total.update_one({'symbol' : symbol_receive}, { '$inc' : {'quantity' : -quantity_receive, 'total' : -modify_total}})
+        db.stock_total.update_one({'id' : payload['id'], 'symbol' : symbol_receive}, { '$inc' : {'quantity' : -quantity_receive, 'total' : -modify_total}})
 
 
     return jsonify({'result' : 'success'})
@@ -470,8 +490,14 @@ def save_order():
 #'매수 종합' 반환하는 함수 
 @app.route('/get_total', methods=['POST'])
 def get_total():
+    
+    #id 받아오기
+    token_receive = request.headers['token_give']
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+
     symbol_receive = request.form['symbol_give']
-    result = db.stock_total.find_one({'symbol' : symbol_receive}, {'_id' : 0})
+    result = db.stock_total.find_one({'id' : payload['id'], 'symbol' : symbol_receive}, {'_id' : 0})
 
     return jsonify({'result' : 'success'}, {'get_total' : result})
 
@@ -479,8 +505,13 @@ def get_total():
 @app.route('/get_order', methods=['POST'])
 def get_order():
 
+    #id 받아오기
+    token_receive = request.headers['token_give']
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+
     symbol_receive = request.form['symbol_give']
-    orders = objectIdDecoder(list(db.stock_orders.find({'symbol' : symbol_receive})))
+    orders = objectIdDecoder(list(db.stock_orders.find({'id' : payload['id'], 'symbol' : symbol_receive})))
 
     return jsonify({'result' : 'success', 'orders' : orders})
 
@@ -488,8 +519,13 @@ def get_order():
 @app.route('/get_sell_record', methods=['POST'])
 def get_sell_record():
 
+    #id 받아오기
+    token_receive = request.headers['token_give']
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+
     symbol_receive = request.form['symbol_give']
-    orders = list(db.stock_orders_sell.find({'symbol' : symbol_receive}, {'_id' : 0}))
+    orders = list(db.stock_orders_sell.find({'id' : payload['id'], 'symbol' : symbol_receive}, {'_id' : 0}))
 
     return jsonify({'result' : 'success', 'orders' : orders})
 
@@ -498,8 +534,13 @@ def get_sell_record():
 @app.route('/get_total_sell_record', methods=['POST'])
 def get_total_sell_record():
 
+    #id 받아오기
+    token_receive = request.headers['token_give']
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+
     symbol_receive = request.form['symbol_give']
-    result = db.stock_total_sell.find_one({'symbol' : symbol_receive}, {'_id' : 0})
+    result = db.stock_total_sell.find_one({'id' : payload['id'], 'symbol' : symbol_receive}, {'_id' : 0})
 
     return jsonify({'result' : 'success'}, {'get_total_sell' : result})
 

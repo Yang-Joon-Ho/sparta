@@ -6,7 +6,42 @@ $(document).ready(function () {
     get_article();
 
     get_time();
+
+    get_id(); //회원 닉네임 가져오기 
 });
+
+function get_id() {
+
+    if ($.cookie('mytoken') == undefined) {
+        // mytoken이라는 값으로 쿠키가 없는 경우
+    } else {
+        // 쿠기가 있으면, 유저 정보를 불러옵니다.
+        $.ajax({
+            type: "GET",
+            url: "/api/nick",
+            headers: { 'token_give': $.cookie('mytoken') },
+            data: {},
+            success: function (response) {
+                if (response['result'] == 'success') {
+                    // 올바른 결과값을 받으면 nickname을 입력해줍니다.
+                    $('#sign-up').empty();
+                    
+                    let temp_html = `${response['id']} 님 환영합니다.
+                    <a onClick="logout()" href="#" class="btn btn-secondary my-2">로그아웃</a>`;
+                    
+                    $('#sign-up').append(temp_html);
+                }
+            }
+        })
+    }
+}
+
+// 로그아웃은 내가 가지고 있는 토큰만 쿠키에서 없애면 됩니다.
+function logout() {
+    $.removeCookie('mytoken');
+    alert('로그아웃')
+    window.location.href = '/'
+}
 
 function get_time() {
 
@@ -72,7 +107,7 @@ function make_card(url, image, title, desc) {
                             <p class="lead mb-0"><a href="${url}" class="text-white font-weight-bold">Contiue reading ...</a></p>
                         </div>               
                 </div>`;
-       
+
     $('#main-box').append(temp_html);
 }
 
@@ -182,7 +217,7 @@ function make_index_nasdaq(index, change, percent, date) {
         <p class="exchange-red card-text mb-auto">${percent}</p>
     </div>`;
     }
-    
+
     $('#nasdaq-index-card').empty();
     $('#nasdaq-index-card').append(temp_html);
 }
@@ -309,7 +344,40 @@ function show_stock(symbol) {
 
 }
 
+function load_user_info() {
+
+    let id;
+    $.ajax({
+        type: "GET",
+        url: "/api/nick",
+        async: false,
+        headers: { 'token_give': $.cookie('mytoken') },
+        data: {},
+        success: function (response) {
+            if (response['result'] == 'success') {
+                // 올바른 결과값을 받으면 nickname을 입력해줍니다.
+                id = response['id'];
+            } else {
+                // 에러가 나면 메시지를 띄우고 로그인 창으로 이동합니다.
+                alert(response['msg'])
+                window.location.href = '/login'
+            }
+        }
+    })
+    return id;
+}
+
 function save_stock() {
+
+    let id_receive;
+    if ($.cookie('mytoken') == undefined) {
+        // mytoken이라는 값으로 쿠키가 없으면, 로그인 창으로 이동시킵니다.
+        alert('먼저 로그인을 해주세요')
+        // window.location.href='/'
+    } else {
+        // 쿠기가 있으면, 유저 정보를 불러옵니다.
+        id_receive = load_user_info();
+    }
 
     let companyName = $('#companyName').text();
     let symbol = $('#symbol').text();
@@ -324,6 +392,7 @@ function save_stock() {
         type: "POST",
         url: "/stock",
         data: {
+            id: id_receive,
             companyName: companyName, symbol: symbol, primaryExchange: primaryExchange, close: close,
             industry: industry, website: website, sector: sector, description: description
         },

@@ -8,6 +8,7 @@ function post_stocks() {
   $.ajax({
     type: "GET",
     url: "/stock",
+    headers: { 'token_give' : $.cookie('mytoken') },
     data: {},
     success: function (response) {
       if (response['result'] == 'success') {
@@ -121,7 +122,6 @@ function make_card(name, symbol, exchange, price, id) {
   });
 }
 
-//<button type="submit" href="#" onClick="location.href='dashboard.html'" class="btn btn-sm btn-outline-secondary">보기</button>
 
 function delete_stock(id) {
 

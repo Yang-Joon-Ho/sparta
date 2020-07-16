@@ -167,10 +167,10 @@ function buy() {
     return;
   }
 
-
   $.ajax({
     type: "POST",
     url: "/order",
+    headers: { 'token_give' : $.cookie('mytoken') },
     data: { symbol_give: symbol, method_give: method, date_give: date, price_give: price, quantity_give: quantity, total_give: total },
     success: function (response) { // 성공하면
 
@@ -188,6 +188,7 @@ function order_record(symbol) {
   $.ajax({
     type: "POST",
     url: "/get_order",
+    headers: { 'token_give' : $.cookie('mytoken') },
     data: { symbol_give: symbol },
     success: function (response) { // 성공하면
 
@@ -209,6 +210,7 @@ function get_total() {
   $.ajax({
     type: "POST",
     url: "/get_total",
+    headers: { 'token_give' : $.cookie('mytoken') },
     async: false,
     data: { symbol_give: symbol },
     success: function (response) { // 성공하면
@@ -258,6 +260,7 @@ function get_sell_record() {
   $.ajax({
     type: "POST",
     url: "/get_sell_record",
+    headers: { 'token_give' : $.cookie('mytoken') },
     data: { symbol_give: symbol },
     success: function (response) { // 성공하면
 
@@ -293,6 +296,7 @@ function get_total_sell_record() {
   $.ajax({
     type: "POST",
     url: "/get_total_sell_record",
+    headers: { 'token_give' : $.cookie('mytoken') },
     data: { symbol_give: symbol },
     success: function (response) { // 성공하면
 

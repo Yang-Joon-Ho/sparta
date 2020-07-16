@@ -14,7 +14,7 @@ function login() {
                 // 이 토큰을 mytoken이라는 키 값으로 쿠키에 저장합니다.
                 $.cookie('mytoken', response['token']);
                 alert('로그인 완료!');
-                window.location.href = 'index.html';
+                window.location.href = '/';
             } else {
                 // 로그인이 안되면 에러메시지를 띄웁니다.
                 alert(response['msg']);
