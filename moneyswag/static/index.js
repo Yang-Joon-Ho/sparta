@@ -25,10 +25,10 @@ function get_id() {
                 if (response['result'] == 'success') {
                     // 올바른 결과값을 받으면 nickname을 입력해줍니다.
                     $('#sign-up').empty();
-                    
+
                     let temp_html = `${response['id']} 님 환영합니다.
                     <a onClick="logout()" href="#" class="btn btn-secondary my-2">로그아웃</a>`;
-                    
+
                     $('#sign-up').append(temp_html);
                 }
             }
@@ -373,35 +373,60 @@ function save_stock() {
     if ($.cookie('mytoken') == undefined) {
         // mytoken이라는 값으로 쿠키가 없으면, 로그인 창으로 이동시킵니다.
         alert('먼저 로그인을 해주세요')
+        return;
         // window.location.href='/'
     } else {
         // 쿠기가 있으면, 유저 정보를 불러옵니다.
         id_receive = load_user_info();
-    }
 
-    let companyName = $('#companyName').text();
-    let symbol = $('#symbol').text();
-    let primaryExchange = $('#primaryExchange').text();
-    let close = $('#close').text();
-    let industry = $('#industry').text();
-    let website = $('#website').text();
-    let sector = $('#sector').text();
-    let description = $('#description').text();
+        let companyName = $('#companyName').text();
+        let symbol = $('#symbol').text();
+        let primaryExchange = $('#primaryExchange').text();
+        let close = $('#close').text();
+        let industry = $('#industry').text();
+        let website = $('#website').text();
+        let sector = $('#sector').text();
+        let description = $('#description').text();
 
-    $.ajax({
-        type: "POST",
-        url: "/stock",
-        data: {
-            id: id_receive,
-            companyName: companyName, symbol: symbol, primaryExchange: primaryExchange, close: close,
-            industry: industry, website: website, sector: sector, description: description
-        },
-        success: function (response) {
-            if (response['result'] == 'success') {
-                alert('관심종목에 추가 완료')
+        $.ajax({
+            type: "POST",
+            url: "/stock",
+            data: {
+                id: id_receive,
+                companyName: companyName, symbol: symbol, primaryExchange: primaryExchange, close: close,
+                industry: industry, website: website, sector: sector, description: description
+            },
+            success: function (response) {
+                if (response['result'] == 'success') {
+                    alert('관심종목에 추가 완료')
+                }
             }
-        }
-    })
+        })
+    }
+}
+
+function move_to_interest() {
+
+    if ($.cookie('mytoken') == undefined) {
+        // mytoken이라는 값으로 쿠키가 없으면, 로그인 창으로 이동시킵니다.
+        alert('먼저 로그인을 해주세요');
+        // window.location.href='/'
+    } else {
+        // 쿠기가 있으면, 유저 정보를 불러옵니다.
+        window.location.href = '/interests.html';
+    }
+}
+
+function move_to_articles() {
+
+    if ($.cookie('mytoken') == undefined) {
+        // mytoken이라는 값으로 쿠키가 없으면, 로그인 창으로 이동시킵니다.
+        alert('먼저 로그인을 해주세요');
+        // window.location.href='/'
+    } else {
+        // 쿠기가 있으면, 유저 정보를 불러옵니다.
+        window.location.href = '/articles.html';
+    }
 }
 
 

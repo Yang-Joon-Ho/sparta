@@ -4,7 +4,7 @@ $(document).ready(function () {
   //$('#stock_row').html('');
   $('#table_price').html('');
   let symbol = $('#stock_symbol').text();
-  
+
   current_price(symbol);
   stock_price(symbol);
   //매수 기록 가져오기
@@ -30,8 +30,8 @@ function get_time(symbol) {
     minutes = "0" + minutes;
   }
 
-  time = hour +""+ minutes;
-  if(time >= 2230 || time <= 500){
+  time = hour + "" + minutes;
+  if (time >= 2230 || time <= 500) {
     console.log(time);
     current_price(symbol);
     console.log(time);
@@ -88,12 +88,16 @@ function current_price(symbol) {
       $('#profit').empty();
 
       let temp = response['price_rate'];
-  
+
       //dashboard 상단에 현재가 나타내기
       append_price_rate(temp['price'], temp['rate']);
 
       //get_total_total은 '매수종합'에서 총 매수가
-      let cal = $('#get_total_quantity').text() * temp['price'] - $('#get_total_total').text();
+      let cal = parseFloat($('#get_total_quantity').text().replace(/,/g, "")) * 
+      parseFloat(temp['price'].replace(/,/g, "")) - parseFloat($('#get_total_total').text().replace(/,/g, ""));
+
+      //x[j] = parseFloat(temp[i]['close'].replace(/,/g, ""));
+      //y[j] = temp[i]['date'];
 
       // $('#price').append(temp['price']);
       // $('#rate').append(temp['rate']);
@@ -170,7 +174,7 @@ function buy() {
   $.ajax({
     type: "POST",
     url: "/order",
-    headers: { 'token_give' : $.cookie('mytoken') },
+    headers: { 'token_give': $.cookie('mytoken') },
     data: { symbol_give: symbol, method_give: method, date_give: date, price_give: price, quantity_give: quantity, total_give: total },
     success: function (response) { // 성공하면
 
@@ -188,7 +192,7 @@ function order_record(symbol) {
   $.ajax({
     type: "POST",
     url: "/get_order",
-    headers: { 'token_give' : $.cookie('mytoken') },
+    headers: { 'token_give': $.cookie('mytoken') },
     data: { symbol_give: symbol },
     success: function (response) { // 성공하면
 
@@ -210,7 +214,7 @@ function get_total() {
   $.ajax({
     type: "POST",
     url: "/get_total",
-    headers: { 'token_give' : $.cookie('mytoken') },
+    headers: { 'token_give': $.cookie('mytoken') },
     async: false,
     data: { symbol_give: symbol },
     success: function (response) { // 성공하면
@@ -260,7 +264,7 @@ function get_sell_record() {
   $.ajax({
     type: "POST",
     url: "/get_sell_record",
-    headers: { 'token_give' : $.cookie('mytoken') },
+    headers: { 'token_give': $.cookie('mytoken') },
     data: { symbol_give: symbol },
     success: function (response) { // 성공하면
 
@@ -296,7 +300,7 @@ function get_total_sell_record() {
   $.ajax({
     type: "POST",
     url: "/get_total_sell_record",
-    headers: { 'token_give' : $.cookie('mytoken') },
+    headers: { 'token_give': $.cookie('mytoken') },
     data: { symbol_give: symbol },
     success: function (response) { // 성공하면
 
@@ -332,52 +336,50 @@ function graph() {
   $.ajax({
     type: "POST",
     url: "/stock_price",
-    async: false,
     data: { url_give: url },
     success: function (response) { // 성공하면
 
       temp = response['dictionary'];
       //temp.forEach(curr => list_price(curr['date'], curr['open'], curr['close'], curr['low'], curr['high'], curr['volume']));
 
-    }     
-  })    
-
-  let x = [];
-  let y = [];
-  for (let j = 0, i = temp.length - 1; i >= 0; j++, i--) {
-    x[j] = parseFloat(temp[i]['close'].replace(/,/g, ""));
-    y[j] = temp[i]['date'];
-  }
-
-  feather.replace()
-
-  // Graphs
-  var ctx = document.getElementById('myChart')
-  // eslint-disable-next-line no-unused-vars
-  var myChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: y,
-      datasets: [{
-        data: x,
-        lineTension: 0,
-        backgroundColor: 'transparent',
-        borderColor: '#007bff',
-        borderWidth: 4,
-        pointBackgroundColor: '#007bff'
-      }]
-    },
-    options: {
-      scales: {
-        yAxes: [{
-          ticks: {
-            beginAtZero: false
-          }
-        }]
-      },
-      legend: {
-        display: false
+      let x = [];
+      let y = [];
+      for (let j = 0, i = temp.length - 1; i >= 0; j++, i--) {
+        x[j] = parseFloat(temp[i]['close'].replace(/,/g, ""));
+        y[j] = temp[i]['date'];
       }
+
+      feather.replace()
+
+      // Graphs
+      var ctx = document.getElementById('myChart')
+      // eslint-disable-next-line no-unused-vars
+      var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: y,
+          datasets: [{
+            data: x,
+            lineTension: 0,
+            backgroundColor: 'transparent',
+            borderColor: '#007bff',
+            borderWidth: 4,
+            pointBackgroundColor: '#007bff'
+          }]
+        },
+        options: {
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: false
+              }
+            }]
+          },
+          legend: {
+            display: false
+          }
+        }
+      })
     }
   })
 }

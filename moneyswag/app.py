@@ -48,7 +48,7 @@ import hashlib
 def home():
    return render_template('index.html')
 
-@app.route('/interest.html')
+@app.route('/interests.html')
 def interest():
     return render_template('interests.html')
 
