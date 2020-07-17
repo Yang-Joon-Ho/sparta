@@ -434,7 +434,7 @@ def save_order():
             db.stock_total.insert_one(total)
         else :
             #평균 단가 구해야함ㅋㅋ
-            before = db.stock_total.find_one({'symbol' : symbol_receive}, {'_id' : 0})
+            before = db.stock_total.find_one({'id' : payload['id'], 'symbol' : symbol_receive}, {'_id' : 0})
             total_price_temp = before['price'] * before['quantity'] + total_receive
             total_quantity_temp = before['quantity'] + quantity_receive
             total_total_temp = before['total'] + total_receive 
